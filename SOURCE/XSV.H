@@ -34,7 +34,7 @@ typedef struct XSV_tagHandleXSV *XSV_tppHandleXSV;
 *     Condições de retorno das funções de XSV.
 *
 ****************************************************************************/
-typedef enum
+typedef enum XSV_enumCondRet
 {
 
     XSV_CondRetOK, /* Concluiu corretamente */
@@ -57,6 +57,19 @@ typedef enum
     linha do aqruivo de input falhou */
 
 } XSV_tpCondRet;
+
+typedef enum XSV_enumCondicaoDeColuna
+{
+
+    XSV_CondicaoIgual, /* Concluiu corretamente */
+
+    XSV_CondicaoDiferente, /* Faltou memória para allocar */
+
+    XSV_CondicaoContem, /* Faltou memória para allocar */
+
+    XSV_CondicaoNaoContem /* Faltou memória para allocar */
+
+} XSV_tpCondicaoDeColuna;
 
 /****************************************************************************
 *
@@ -93,19 +106,20 @@ XSV_tpCondRet XSV_DefinirOpArquivoInput(XSV_tppHandleXSV pHandleXSV, char pNomeD
 /****************************************************************************
 *
 *	$FC Função:
-*       XSV Definir arquivo de tipo XSV para onde os dados serão gravados.
+*       XSV Armazenar nome e função de transformação de coluna em uma lista
+*           de colunas para impressão.
 *
 ****************************************************************************/
-XSV_tpCondRet XSV_DefinirOpArquivoOutput(XSV_tppHandleXSV pHandleXSV, char pNomeDoArquivoDeOutput[]);
+XSV_tpCondRet XSV_AcrescentarColunaParaImpressaoAoHandle(XSV_tppHandleXSV pHandleXSV, char pNomeDaColunaSelecionada[], void(*funcaoDeTransformacao)(char*));
 
 /****************************************************************************
 *
 *	$FC Função:
-*       XSV Armazenar nome e função de transformação de coluna em uma lista
-*           de colunas selecionadas.
+*       XSV Armazenar nome, conteúdo e condição de coluna em uma lista
+*           de colunas condicionais.
 *
 ****************************************************************************/
-XSV_tpCondRet XSV_AcrescentarColunaNaListaDeColunas(XSV_tppHandleXSV pHandleXSV, char pNomeDaColunaSelecionada[], void(*funcaoDeTransformacao)(char*));
+XSV_tpCondRet XSV_AcrescentarColunaCondicionalAoHandle(XSV_tppHandleXSV pHandleXSV, char pNomeDaColunaCondicional[], char pStringDaCondicao[], XSV_tpCondicaoDeColuna vCondicaoDaColuna);
 
 /****************************************************************************
 *
@@ -114,7 +128,7 @@ XSV_tpCondRet XSV_AcrescentarColunaNaListaDeColunas(XSV_tppHandleXSV pHandleXSV,
 *           selcionadas.
 *
 ****************************************************************************/
-XSV_tpCondRet XSV_TransformarListaDeColunasEmConjunto(XSV_tppHandleXSV pHandleXSV);
+XSV_tpCondRet XSV_TransformarListasDeColunasParaImpressaoEmConjuntos(XSV_tppHandleXSV pHandleXSV);
 
 /****************************************************************************
 *

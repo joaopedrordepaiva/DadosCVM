@@ -77,6 +77,9 @@ typedef enum
     LIS_CondRetConteudoNaoExiste,
     /* Tentou incluir um conteúdo nulo em um nó da lista */
 
+    LIS_CondRetNoPossuiConteudo,
+    /* Tentou inserir conteúdo em um nó da lista que já possuia conteúdo */
+
 #endif
 
 } LIS_tpCondRet;
@@ -100,9 +103,6 @@ typedef enum
 *           para a cabeça da lista.
 *           Este parâmetro é passado por referência.
 *
-****************************************************************************/
-LIS_tpCondRet LIS_CriarLista(void (*ExcluirValor)(void *pDado), LIS_tppCabecaLista *pCabecaDaLista);
-/****************************************************************************
 *
 *	$AS Assertivas de saída esperadas:
 *       Cabeça da lista foi criada.
@@ -116,6 +116,7 @@ LIS_tpCondRet LIS_CriarLista(void (*ExcluirValor)(void *pDado), LIS_tppCabecaLis
 *       LIS_CondRetOK
 *
 ****************************************************************************/
+LIS_tpCondRet LIS_CriarLista(void (*ExcluirValor)(void *pDado), LIS_tppCabecaLista *pCabecaDaLista);
 
 
 /****************************************************************************
@@ -136,9 +137,6 @@ LIS_tpCondRet LIS_CriarLista(void (*ExcluirValor)(void *pDado), LIS_tppCabecaLis
 *           para a cabeça da lista.
 *           Este parâmetro é passado por referência.
 *
-****************************************************************************/
-LIS_tpCondRet LIS_DestruirLista(LIS_tppCabecaLista pCabecaDaLista);
-/****************************************************************************
 *
 *	$AS Assertivas de saída esperadas:
 *       Lista foi destruída.
@@ -150,6 +148,7 @@ LIS_tpCondRet LIS_DestruirLista(LIS_tppCabecaLista pCabecaDaLista);
 *       LIS_CondRetOK
 *
 ****************************************************************************/
+LIS_tpCondRet LIS_DestruirLista(LIS_tppCabecaLista pCabecaDaLista);
 
 
 /****************************************************************************
@@ -174,9 +173,6 @@ LIS_tpCondRet LIS_DestruirLista(LIS_tppCabecaLista pCabecaDaLista);
 *           para a cabeça da lista.
 *           Este parâmetro é passado por referência.
 *
-****************************************************************************/
-LIS_tpCondRet LIS_InserirNoAntes(LIS_tppCabecaLista pCabecaDaLista, void *pConteudo);
-/****************************************************************************
 *
 *	$AS Assertivas de saída esperadas:
 *       Um novo nó foi inserido antes do nó corrente ou nó novo é o único nó
@@ -191,6 +187,7 @@ LIS_tpCondRet LIS_InserirNoAntes(LIS_tppCabecaLista pCabecaDaLista, void *pConte
 *       LIS_CondRetOK
 *
 ****************************************************************************/
+LIS_tpCondRet LIS_InserirNoAntes(LIS_tppCabecaLista pCabecaDaLista, void *pConteudo);
 
 
 /****************************************************************************
@@ -215,9 +212,6 @@ LIS_tpCondRet LIS_InserirNoAntes(LIS_tppCabecaLista pCabecaDaLista, void *pConte
 *           para a cabeça da lista.
 *           Este parâmetro é passado por referência.
 *
-****************************************************************************/
-LIS_tpCondRet LIS_InserirNoApos(LIS_tppCabecaLista pCabecaDaLista, void *pConteudo);
-/****************************************************************************
 *
 *	$AS Assertivas de saída esperadas:
 *       Um novo nó foi inserido após o corrente ou nó novo é o único nó da
@@ -232,6 +226,7 @@ LIS_tpCondRet LIS_InserirNoApos(LIS_tppCabecaLista pCabecaDaLista, void *pConteu
 *       LIS_CondRetOK
 *
 ****************************************************************************/
+LIS_tpCondRet LIS_InserirNoApos(LIS_tppCabecaLista pCabecaDaLista, void *pConteudo);
 
 
 /****************************************************************************
@@ -253,9 +248,6 @@ LIS_tpCondRet LIS_InserirNoApos(LIS_tppCabecaLista pCabecaDaLista, void *pConteu
 *           para a cabeça da lista.
 *           Este parâmetro é passado por referência.
 *
-****************************************************************************/
-LIS_tpCondRet LIS_ExcluirNo(LIS_tppCabecaLista pCabecaDaLista);
-/****************************************************************************
 *
 *	$AS Assertivas de saída esperadas:
 *       Nó corrente da lista foi excluído ou lista é vazia (nó corrente é
@@ -272,7 +264,7 @@ LIS_tpCondRet LIS_ExcluirNo(LIS_tppCabecaLista pCabecaDaLista);
 *       LIS_CondRetOK
 *
 ****************************************************************************/
-
+LIS_tpCondRet LIS_ExcluirNo(LIS_tppCabecaLista pCabecaDaLista);
 
 /****************************************************************************
 *
@@ -296,9 +288,6 @@ LIS_tpCondRet LIS_ExcluirNo(LIS_tppCabecaLista pCabecaDaLista);
 *           para a cabeça da lista.
 *           Este parâmetro é passado por referência.
 *
-****************************************************************************/
-LIS_tpCondRet LIS_ObterConteudo(LIS_tppCabecaLista pCabecaDaLista, void **ppConteudo);
-/****************************************************************************
 *
 *	$AS Assertivas de saída esperadas:
 *       Conteudo do nó corrente da lista foi obtido.
@@ -311,6 +300,44 @@ LIS_tpCondRet LIS_ObterConteudo(LIS_tppCabecaLista pCabecaDaLista, void **ppCont
 *       LIS_CondRetOK
 *
 ****************************************************************************/
+LIS_tpCondRet LIS_ObterConteudo(LIS_tppCabecaLista pCabecaDaLista, void **ppConteudo);
+
+
+/****************************************************************************
+*
+*	$FC Função:
+*       LIS Inserir conteúdo no nó corrente da lista.
+*
+*
+*	$AE Assertivas de entrada esperadas:
+*       Nó corrente aponta para o nó onde deseja-se inserir o conteúdo.
+*       Conteúdo do nó corrente é nulo.
+*		Cabeça da lista não é nula.
+*		Valem as assertivas estruturais da lista duplamente encadeada com
+*       cabeça.
+*
+*
+*  $EP Parâmetros
+*       $P pConteudo - O parâmetro que receberá o conteúdo a ser inserido no
+*           nó.
+*           Este parâmetro é passado por valor.
+*       $P pCabecaDaLista - O parâmetro que receberá o endereço do ponteiro
+*           para a cabeça da lista.
+*           Este parâmetro é passado por referência.
+*
+*
+*	$AS Assertivas de saída esperadas:
+*       Conteudo foi inserido no nó corrente da lista.
+*		Valem as assertivas estruturais da lista duplamente encadeada com
+*       cabeça.
+*
+*
+*   $FV Valor retornado
+*       LIS_CondRetListaVazia;
+*       LIS_CondRetOK
+*
+****************************************************************************/
+LIS_tpCondRet LIS_InserirConteudo(LIS_tppCabecaLista pCabecaDaLista, void *pConteudo);
 
 
 /****************************************************************************
@@ -331,9 +358,6 @@ LIS_tpCondRet LIS_ObterConteudo(LIS_tppCabecaLista pCabecaDaLista, void **ppCont
 *           para a cabeça da lista.
 *           Este parâmetro é passado por referência.
 *
-****************************************************************************/
-LIS_tpCondRet LIS_IrParaProximoNo(LIS_tppCabecaLista pCabecaDaLista);
-/****************************************************************************
 *
 *	$AS Assertivas de saída esperadas:
 *       Nó corrente aponta para o nó desejado.
@@ -346,6 +370,7 @@ LIS_tpCondRet LIS_IrParaProximoNo(LIS_tppCabecaLista pCabecaDaLista);
 *       LIS_CondRetOK
 *
 ****************************************************************************/
+LIS_tpCondRet LIS_IrParaProximoNo(LIS_tppCabecaLista pCabecaDaLista);
 
 
 /****************************************************************************
@@ -366,9 +391,6 @@ LIS_tpCondRet LIS_IrParaProximoNo(LIS_tppCabecaLista pCabecaDaLista);
 *           para a cabeça da lista.
 *           Este parâmetro é passado por referência.
 *
-****************************************************************************/
-LIS_tpCondRet LIS_IrParaNoAnterior(LIS_tppCabecaLista pCabecaDaLista);
-/****************************************************************************
 *
 *	$AS Assertivas de saída esperadas:
 *       Nó corrente aponta para o nó desejado.
@@ -381,6 +403,7 @@ LIS_tpCondRet LIS_IrParaNoAnterior(LIS_tppCabecaLista pCabecaDaLista);
 *       LIS_CondRetOK
 *
 ****************************************************************************/
+LIS_tpCondRet LIS_IrParaNoAnterior(LIS_tppCabecaLista pCabecaDaLista);
 
 /****************************************************************************
 *
@@ -399,9 +422,6 @@ LIS_tpCondRet LIS_IrParaNoAnterior(LIS_tppCabecaLista pCabecaDaLista);
 *           para a cabeça da lista.
 *           Este parâmetro é passado por referência.
 *
-****************************************************************************/
-LIS_tpCondRet LIS_IrParaPrimeiroNo(LIS_tppCabecaLista pCabecaDaLista);
-/****************************************************************************
 *
 *	$AS Assertivas de saída esperadas:
 *       Nó corrente aponta para o primeiro nó.
@@ -414,6 +434,7 @@ LIS_tpCondRet LIS_IrParaPrimeiroNo(LIS_tppCabecaLista pCabecaDaLista);
 *       LIS_CondRetOK
 *
 ****************************************************************************/
+LIS_tpCondRet LIS_IrParaPrimeiroNo(LIS_tppCabecaLista pCabecaDaLista);
 
 
 #ifdef _DEBUG
@@ -437,9 +458,6 @@ LIS_tpCondRet LIS_IrParaPrimeiroNo(LIS_tppCabecaLista pCabecaDaLista);
 *       $P deturpacao - O parâmetro que receberá o caso de deturpação.
 *           Este parâmetro é passado por valor.
 *
-****************************************************************************/
-LIS_tpCondRet LIS_Deturpador(LIS_tppCabecaLista pCabecaDaLista, int deturpacao);
-/****************************************************************************
 *
 *	$AS Assertivas de saída esperadas:
 *       Estrutura foi deturpada no nó corrente.
@@ -451,6 +469,7 @@ LIS_tpCondRet LIS_Deturpador(LIS_tppCabecaLista pCabecaDaLista, int deturpacao);
 *       LIS_CondRetOK
 *
 ****************************************************************************/
+LIS_tpCondRet LIS_Deturpador(LIS_tppCabecaLista pCabecaDaLista, int deturpacao);
 
 
 /****************************************************************************
@@ -470,9 +489,6 @@ LIS_tpCondRet LIS_Deturpador(LIS_tppCabecaLista pCabecaDaLista, int deturpacao);
 *           para a cabeça da lista.
 *           Este parâmetro é passado por referência.
 *
-****************************************************************************/
-int LIS_Verificador(LIS_tppCabecaLista pCabecaDaLista);
-/****************************************************************************
 *
 *	$AS Assertivas de saída esperadas:
 *       O número correto de deturpações foi detectado ou programa voou.
@@ -484,6 +500,7 @@ int LIS_Verificador(LIS_tppCabecaLista pCabecaDaLista);
 *       numFalhasObservadas
 *
 ****************************************************************************/
+int LIS_Verificador(LIS_tppCabecaLista pCabecaDaLista);
 #endif
 
 #endif /* LISTA_H */

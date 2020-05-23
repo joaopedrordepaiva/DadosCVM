@@ -380,6 +380,35 @@ LIS_tpCondRet LIS_ExcluirNo(LIS_tppCabecaLista pCabecaDaLista)
 /****************************************************************************
 *
 *	$FC Função:
+*       LIS Inserir conteúdo no nó corrente da lista.
+*
+****************************************************************************/
+LIS_tpCondRet LIS_InserirConteudo(LIS_tppCabecaLista pCabecaDaLista, void *pConteudo)
+{
+
+#ifdef _DEBUG
+    if (!pCabecaDaLista)
+        return LIS_CondRetListaNaoExiste;
+    if (pCabecaDaLista->pNoCorrente->pConteudo)
+        /* Nó corrente não possui conteúdo */
+        return LIS_CondRetNoPossuiConteudo;
+        /* Retorna condição de falha na obtenção do conteúdo do nó corrente */
+#endif
+
+    if (!pCabecaDaLista->pNoCorrente)
+        /* Não há nó corrente */
+        return LIS_CondRetListaVazia;
+        /* Retorna condição de lista vazia */
+
+    pCabecaDaLista->pNoCorrente->pConteudo = pConteudo;
+    /* Insere conteúdo no nó corrente */
+
+    return LIS_CondRetOK; /* Retorna condição de teste bem sucedido */
+}
+
+/****************************************************************************
+*
+*	$FC Função:
 *       LIS Obter conteúdo do nó corrente da lista.
 *
 ****************************************************************************/
@@ -852,6 +881,16 @@ int LIS_Verificador(LIS_tppCabecaLista pCabecaDaLista)
 *           liberado.
 *           Este parâmetro é passado por valor.
 *
+*
+*	$AS Assertivas de saída esperadas:
+*       Espaço alocado apontado pelo nó corrente da lista foi liberado.
+*		Valem as assertivas estruturais da lista duplamente encadeada com
+*       cabeça.
+*
+*
+*   $FV Valor retornado
+*       LIS_CondRetOK
+*
 ****************************************************************************/
 LIS_tpCondRet LIS_LiberarNo(LIS_tppCabecaLista pCabecaDaLista, LIS_tpNoLista *pNo)
 {
@@ -874,18 +913,6 @@ LIS_tpCondRet LIS_LiberarNo(LIS_tppCabecaLista pCabecaDaLista, LIS_tpNoLista *pN
 
     return LIS_CondRetOK;
 }
-/****************************************************************************
-*
-*	$AS Assertivas de saída esperadas:
-*       Espaço alocado apontado pelo nó corrente da lista foi liberado.
-*		Valem as assertivas estruturais da lista duplamente encadeada com
-*       cabeça.
-*
-*
-*   $FV Valor retornado
-*       LIS_CondRetOK
-*
-****************************************************************************/
 
 /****************************************************************************
 *
@@ -903,6 +930,17 @@ LIS_tpCondRet LIS_LiberarNo(LIS_tppCabecaLista pCabecaDaLista, LIS_tpNoLista *pN
 *       $P pConteudo - O parâmetro que receberá o ponteiro para o conteúdo a
 *           ser inserido no nó criado.
 *           Este parâmetro é passado por valor.
+*
+*
+*	$AS Assertivas de saída esperadas:
+*       Nó foi criado.
+*		Valem as assertivas estruturais da lista duplamente encadeada com
+*       cabeça.
+*
+*
+*   $FV Valor retornado
+*       pNo (ponteiro para nó criado)
+*       NULL
 *
 ****************************************************************************/
 LIS_tpNoLista *LIS_CriarNo(void *pConteudo
@@ -943,16 +981,3 @@ LIS_tpNoLista *LIS_CriarNo(void *pConteudo
 
     return pNo;
 }
-/****************************************************************************
-*
-*	$AS Assertivas de saída esperadas:
-*       Nó foi criado.
-*		Valem as assertivas estruturais da lista duplamente encadeada com
-*       cabeça.
-*
-*
-*   $FV Valor retornado
-*       pNo (ponteiro para nó criado)
-*       NULL
-*
-****************************************************************************/
