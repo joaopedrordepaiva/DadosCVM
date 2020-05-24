@@ -2,51 +2,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
+#include <string.h>
 
-// #define SYS_IS_LINUX
-
-// #ifdef SYS_IS_LINUX
-// #include <termios.h>
-
-// static struct termios old, current;
-
-// /* Initialize new terminal i/o settings */
-// void initTermios(int echo)
-// {
-//     tcgetattr(0, &old);         /* grab old terminal i/o settings */
-//     current = old;              /* make new settings same as old settings */
-//     current.c_lflag &= ~ICANON; /* disable buffered i/o */
-//     if (echo)
-//     {
-//         current.c_lflag |= ECHO; /* set echo mode */
-//     }
-//     else
-//     {
-//         current.c_lflag &= ~ECHO; /* set no echo mode */
-//     }
-//     tcsetattr(0, TCSANOW, &current); /* use these new terminal i/o settings now */
-// }
-
-// /* Restore old terminal i/o settings */
-// void resetTermios(void)
-// {
-//     tcsetattr(0, TCSANOW, &old);
-// }
-
-// /* Read 1 character - echo defines echo mode */
-// char getch(void)
-// {
-//     char ch;
-//     initTermios(0);
-//     ch = getchar();
-//     resetTermios();
-//     return ch;
-// }
-// #endif
-
-// #ifdef SYS_IS_WIN
-// #include <conio.h>
-// #endif
 
 void stringUpper(char pString[])
 {
@@ -61,7 +18,7 @@ int main(int argc, char **argv)
     XSV_tppHandleXSV pHandleXSV;
 
     char pSeparadorDeColunas[] = ";";
-    char *pVetorDeColunasSelecionadas[] = { "SIT", "DENOM_SOCIAL", "CD_CVM"};
+    char *pVetorDeColunasSelecionadas[] = {"DENOM_SOCIAL", "CD_CVM"};
 
     char pNomeDoArquivoDeInput[] = "/home/johnnyriver/Documents/Projetos/ProjetoDadosDaBolsa/CAD/CAD_CIA_ABERTA.CSV";
 
@@ -87,7 +44,7 @@ int main(int argc, char **argv)
     }
     printf("Definição do arquivo de input da handle do arquivo XSV bem sucedida.\n");
 
-    for (int i = 0; i < 3; i++)
+    for (int i = 0; i < 2; i++)
     {
         if (XSV_AcrescentarColunaParaImpressaoAoHandle(pHandleXSV, pVetorDeColunasSelecionadas[i], NULL) != XSV_CondRetOK)
         {
@@ -97,13 +54,6 @@ int main(int argc, char **argv)
         printf("Adição de coluna para impressão na handle do arquivo XSV bem sucedida.\n");
     }
 
-    if (XSV_AcrescentarColunaParaImpressaoAoHandle(pHandleXSV, "AUDITOR", stringUpper) != XSV_CondRetOK)
-    {
-        printf("Problema na adição de coluna para impressão na handle do arquivo XSV.\n");
-        exit(1);
-    }
-    printf("Adição de coluna para impressão na handle do arquivo XSV bem sucedida.\n");
-
     if (XSV_AcrescentarColunaParaImpressaoAoHandle(pHandleXSV, "SETOR_ATIV", stringUpper) != XSV_CondRetOK)
     {
         printf("Problema na adição de coluna para impressão na handle do arquivo XSV.\n");
@@ -111,14 +61,21 @@ int main(int argc, char **argv)
     }
     printf("Adição de coluna para impressão na handle do arquivo XSV bem sucedida.\n");
 
-    if (XSV_AcrescentarColunaCondicionalAoHandle(pHandleXSV, "SIT", "ATIVO", XSV_CondicaoIgual) != XSV_CondRetOK)
+    if (XSV_AcrescentarColunaCondicionalAoHandle(pHandleXSV, "SIT", (void*)"ATIVO", XSV_CondicaoIgual) != XSV_CondRetOK)
     {
         printf("Problema na adição de coluna condicional na handle do arquivo XSV.\n");
         exit(1);
     }
     printf("Adição de coluna condicional na handle do arquivo XSV bem sucedida.\n");
 
-    if (XSV_TransformarListasDeColunasParaImpressaoEmConjuntos(pHandleXSV) != XSV_CondRetOK)
+    if (XSV_TransformarListaDeColunasParaImpressaoEmConjunto(pHandleXSV) != XSV_CondRetOK)
+    {
+        printf("Problema na transformação da lista de colunas em conjunto de colunas.\n");
+        exit(1);
+    }
+    printf("Transformação da lista de colunas em conjunto de colunas bem sucedida.\n");
+
+    if (XSV_TransformarListaDeColunasCondicionaisEmConjunto(pHandleXSV) != XSV_CondRetOK)
     {
         printf("Problema na transformação da lista de colunas em conjunto de colunas.\n");
         exit(1);

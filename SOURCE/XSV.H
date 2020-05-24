@@ -12,6 +12,9 @@
 *   $HA Histórico de evolução:
 *       Versão  Autor   Data        Observações
 *       1.00    jpp     18/04/2020  Início do desenvolvimento
+*       2.00    jpp     24/05/2020  Enumeração de condição e funções
+*                                   condicionais. Remoção das funções de
+*                                   arquivo de output.
 *
 *
 *   $ED Descrição do módulo
@@ -61,13 +64,22 @@ typedef enum XSV_enumCondRet
 typedef enum XSV_enumCondicaoDeColuna
 {
 
-    XSV_CondicaoIgual, /* Concluiu corretamente */
+    XSV_CondicaoIgual,
+    /* Determinar se o valor da coluna é igual ao parâmetro */
 
-    XSV_CondicaoDiferente, /* Faltou memória para allocar */
+    XSV_CondicaoDiferente,
+    /* Determinar se o valor da coluna não é igual ao parâmetro */
 
-    XSV_CondicaoContem, /* Faltou memória para allocar */
+    XSV_CondicaoContem,
+    /* Determinar se o valor da coluna contém o parâmetro */
 
-    XSV_CondicaoNaoContem /* Faltou memória para allocar */
+    XSV_CondicaoNaoContem,
+    /* Determinar se o valor da coluna não contém o parâmetro */
+
+    XSV_CondicaoPorFuncao
+    /* Função passada como parâmetro determinará se valor da coluna obedece
+    ou não à condição. A função deve retornar 0 se o valor não obedece à
+    condição e um valor diferente de 0 caso contrário. */
 
 } XSV_tpCondicaoDeColuna;
 
@@ -90,7 +102,7 @@ XSV_tpCondRet XSV_DestruirHandleDeArquivoXSV(XSV_tppHandleXSV pHandleXSV);
 /****************************************************************************
 *
 *	$FC Função:
-*       XSV Definir a string que separa as colunas do arquivo de input.
+*       XSV Definir caractere que separa as colunas do arquivo de input.
 *
 ****************************************************************************/
 XSV_tpCondRet XSV_DefinirSeparadorDoInput(XSV_tppHandleXSV pHandleXSV, char *pSeparadorDeColunas);
@@ -106,29 +118,38 @@ XSV_tpCondRet XSV_DefinirOpArquivoInput(XSV_tppHandleXSV pHandleXSV, char pNomeD
 /****************************************************************************
 *
 *	$FC Função:
-*       XSV Armazenar nome e função de transformação de coluna em uma lista
-*           de colunas para impressão.
+*       XSV Armazenar nome, conteúdo e condição de coluna à lista
+*           de colunas condicionais do HandleXSV.
 *
 ****************************************************************************/
-XSV_tpCondRet XSV_AcrescentarColunaParaImpressaoAoHandle(XSV_tppHandleXSV pHandleXSV, char pNomeDaColunaSelecionada[], void(*funcaoDeTransformacao)(char*));
+XSV_tpCondRet XSV_AcrescentarColunaCondicionalAoHandle(XSV_tppHandleXSV pHandleXSV, char pNomeDaColunaCondicional[], void *pParametroCondicao, XSV_tpCondicaoDeColuna vCondicaoDaColuna);
 
 /****************************************************************************
 *
 *	$FC Função:
-*       XSV Armazenar nome, conteúdo e condição de coluna em uma lista
-*           de colunas condicionais.
+*       XSV Armazenar nome e função de transformação de coluna à lista
+*           de colunas para impressão do HandleXSV.
 *
 ****************************************************************************/
-XSV_tpCondRet XSV_AcrescentarColunaCondicionalAoHandle(XSV_tppHandleXSV pHandleXSV, char pNomeDaColunaCondicional[], char pStringDaCondicao[], XSV_tpCondicaoDeColuna vCondicaoDaColuna);
+XSV_tpCondRet XSV_AcrescentarColunaParaImpressaoAoHandle(XSV_tppHandleXSV pHandleXSV, char pNomeDaColunaParaImpressao[], void (*funcaoDeTransformacao)(char *));
 
 /****************************************************************************
 *
 *	$FC Função:
-*       XSV Transformar lista de colunas selecionadas em conjunto de colunas
-*           selcionadas.
+*       XSV Transformar lista de colunas condicionais em conjunto de colunas
+*           condicionais.
 *
 ****************************************************************************/
-XSV_tpCondRet XSV_TransformarListasDeColunasParaImpressaoEmConjuntos(XSV_tppHandleXSV pHandleXSV);
+XSV_tpCondRet XSV_TransformarListaDeColunasCondicionaisEmConjunto(XSV_tppHandleXSV pHandleXSV);
+
+/****************************************************************************
+*
+*	$FC Função:
+*       XSV Transformar lista de colunas para impressão em conjunto de
+*           colunas para impressão.
+*
+****************************************************************************/
+XSV_tpCondRet XSV_TransformarListaDeColunasParaImpressaoEmConjunto(XSV_tppHandleXSV pHandleXSV);
 
 /****************************************************************************
 *
@@ -137,7 +158,6 @@ XSV_tpCondRet XSV_TransformarListasDeColunasParaImpressaoEmConjuntos(XSV_tppHand
 *
 ****************************************************************************/
 XSV_tpCondRet XSV_ImprimirDadosDeColunasSelecionadas(XSV_tppHandleXSV pHandleXSV);
-
 
 
 #endif /* XSV_H */

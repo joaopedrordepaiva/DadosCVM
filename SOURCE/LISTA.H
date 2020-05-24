@@ -17,7 +17,8 @@
 *       1.00    jpp     27/11/2019  Início do desenvolvimento
 *       2.00    jpp     28/11/2019  Deturpador
 *       3.00    jpp     29/11/2019  Verificador
-*
+*       4.00    jpp     24/05/2020  Função de inserir conteúdo no nó
+*                                   corrente.
 *
 *   $ED Descrição do módulo
 *       Este módulo implementa um conjunto de funções para criar e explorar
