@@ -21,10 +21,15 @@
 *       2.00    jpp     20/04/2020  Funções parsing e impressão de colunas
 *       3.00    jpp     24/04/2020  Nomes de variáveis, tranformações de 
 *                                   colunas e adição desordenada de colunas
-*       4.00    jpp     24/05/2020  Impressão de colunas com ordem
+*       4.00    jpp     23/05/2020  Impressão de colunas com ordem
 *                                   determinada pelo usuário, retirada das
 *                                   funções de arquivo de output e impressão
 *                                   condicional.
+*       5.00    jpp     24/05/2020  Lista de colunas condicionais e para
+*                                   impressão pode conter colunas que não
+*                                   estão estão no arquivo ou ser vazia.
+*       6.00    jpp     25/05/2020  Função de execução do processamento.
+*                                   Documentação de funções encapsuladas.
 *
 ****************************************************************************/
 
@@ -50,7 +55,7 @@ struct XSV_tagHandleXSV
     size_t vConjuntoDeColunasParaImpressao;
     size_t vConjuntoDeColunasCondicionais;
 
-    char *pNomeDoArquivoDeInput;
+    char *pCaminhoParaArquivoDeInput;
     char *pSeparadorDeColunas;
 
     unsigned char vNumNos;
@@ -74,6 +79,9 @@ typedef struct XSV_tpColunaCondicional
 
 /************** Protótipos das funções encapuladas no módulo ***************/
 
+static XSV_tpCondRet XSV_ImprimirDadosDeColunasSelecionadas(XSV_tppHandleXSV pHandleXSV);
+static XSV_tpCondRet XSV_TransformarListaDeColunasParaImpressaoEmConjunto(XSV_tppHandleXSV pHandleXSV);
+static XSV_tpCondRet XSV_TransformarListaDeColunasCondicionaisEmConjunto(XSV_tppHandleXSV pHandleXSV);
 static XSV_tpCondRet XSV_AjustaOrdemDaListaDeColunasParaImpressao(XSV_tppListaDeColunasParaImpressao pListaDeColunasParaImpressaoOrdemRequerida, XSV_tppListaDeColunasParaImpressao pListaDeColunasParaImpressaoOrdemDoArquivo);
 static XSV_tpCondRet XSV_VerificaColunaCondicional(void *pParametroCondicao, char pValorDaColuna[], XSV_tpCondicaoDeColuna vCondicaoDaColuna, char *pCondicaoFoiObedecida);
 static XSV_tpCondRet XSV_AcrescentarColunaCondicionalNaLista(XSV_tppListaDeColunasCondicionais *ppListaDeColunasCondicionais, char pNomeDaColunaCondicional[], void *vParametroCondicao, XSV_tpCondicaoDeColuna vCondicaoDaColuna);
@@ -131,7 +139,7 @@ XSV_tpCondRet XSV_DestruirHandleDeArquivoXSV(XSV_tppHandleXSV pHandleXSV)
 /****************************************************************************
 *
 *	$FC Função:
-*       XSV Definir caractere que separa as colunas do arquivo de input.
+*       XSV Definir string que separa as colunas do arquivo de input.
 *
 ****************************************************************************/
 XSV_tpCondRet XSV_DefinirSeparadorDoInput(XSV_tppHandleXSV pHandleXSV, char *pSeparadorDeColunas)
@@ -148,9 +156,9 @@ XSV_tpCondRet XSV_DefinirSeparadorDoInput(XSV_tppHandleXSV pHandleXSV, char *pSe
 *       XSV Definir arquivo de tipo XSV de onde os dados serão extraídos.
 *
 ****************************************************************************/
-XSV_tpCondRet XSV_DefinirOpArquivoInput(XSV_tppHandleXSV pHandleXSV, char pNomeDoArquivoDeInput[])
+XSV_tpCondRet XSV_DefinirOpArquivoInput(XSV_tppHandleXSV pHandleXSV, char pCaminhoParaArquivoDeInput[])
 {
-    pHandleXSV->pNomeDoArquivoDeInput = pNomeDoArquivoDeInput;
+    pHandleXSV->pCaminhoParaArquivoDeInput = pCaminhoParaArquivoDeInput;
 
     return XSV_CondRetOK;
 }
@@ -162,11 +170,11 @@ XSV_tpCondRet XSV_DefinirOpArquivoInput(XSV_tppHandleXSV pHandleXSV, char pNomeD
 *           de colunas condicionais do HandleXSV.
 *
 ****************************************************************************/
-XSV_tpCondRet XSV_AcrescentarColunaCondicionalAoHandle(XSV_tppHandleXSV pHandleXSV, char pNomeDaColunaCondicional[], void *pParametroCondicao, XSV_tpCondicaoDeColuna vCondicaoDaColuna)
+XSV_tpCondRet XSV_AcrescentarColunaCondicionalAoHandle(XSV_tppHandleXSV pHandleXSV, char pNomeDaColunaCondicional[], void *pObjetoCondicional, XSV_tpCondicaoDeColuna vCondicaoDaColuna)
 {
     XSV_tpCondRet vCondRetDeXSV;
 
-    vCondRetDeXSV = XSV_AcrescentarColunaCondicionalNaLista(&(pHandleXSV->pListaDeColunasCondicionais), pNomeDaColunaCondicional, pParametroCondicao, vCondicaoDaColuna);
+    vCondRetDeXSV = XSV_AcrescentarColunaCondicionalNaLista(&(pHandleXSV->pListaDeColunasCondicionais), pNomeDaColunaCondicional, pObjetoCondicional, vCondicaoDaColuna);
 
     if (vCondRetDeXSV != XSV_CondRetOK)
         return vCondRetDeXSV;
@@ -197,8 +205,80 @@ XSV_tpCondRet XSV_AcrescentarColunaParaImpressaoAoHandle(XSV_tppHandleXSV pHandl
 /****************************************************************************
 *
 *	$FC Função:
+*       XSV Processar o arquivo XSV de acordo com o que o usuário definiu
+*           para o Handle. Resultado das operações é colocado em stdout.
+*
+****************************************************************************/
+XSV_tpCondRet XSV_ExecutarProcessamentoDoArquivoXSV(XSV_tppHandleXSV pHandleXSV)
+{
+    XSV_tpCondRet vCondRetDeXSV;
+
+    vCondRetDeXSV = XSV_TransformarListaDeColunasCondicionaisEmConjunto(pHandleXSV);
+    if (vCondRetDeXSV != XSV_CondRetOK)
+        return vCondRetDeXSV;
+
+    vCondRetDeXSV = XSV_TransformarListaDeColunasParaImpressaoEmConjunto(pHandleXSV);
+    if (vCondRetDeXSV != XSV_CondRetOK)
+        return vCondRetDeXSV;
+
+    vCondRetDeXSV = XSV_ImprimirDadosDeColunasSelecionadas(pHandleXSV);
+    if (vCondRetDeXSV != XSV_CondRetOK)
+        return vCondRetDeXSV;
+
+    return XSV_CondRetOK;
+}
+
+/**************** Código das funções encapsuladas no módulo ****************/
+
+/****************************************************************************
+*
+*	$FC Função:
 *       XSV Transformar lista de colunas condicionais em conjunto de colunas
-*           condicionais.
+*           condicionais. Ordenar lista de colunas de acordo com a primeira
+*           linha do arquivo XSV.
+*
+*
+*   $AE Assertivas de entrada esperadas:
+*		Valem as assertivas estruturais da Handle de arquivo XSV.
+*       Handle de XSV foi inicializada (não é nula).
+*       Conjunto pode já ter sido criado (Handle será reprocessado e o
+*       conjunto sobrescrito).
+*       Se alguma das colunas não pertencer às colunas do arquivo, esta
+*       coluna será ignorada.
+*       A lista de colunas condicionais pode estar vazia.
+*       Arquivo XSV de input e separador de colunas já devem ter sido
+*       definidos.
+*
+*
+*  $EP Parâmetros
+*       $P pHandleXSV - O parâmetro que receberá a Handle de arquivo XSV.
+*           Este parâmetro é passado por referência.
+*
+*
+*	$AS Assertivas de saída esperadas:
+*		Valem as assertivas estruturais da Handle de arquivo XSV.
+*       Lista de colunas condicionais foi transformada em conjunto.
+*       Lista de colunas condicionais foi ordenada de acordo com a primeira
+*       linha do arquivo XSV.
+*       Colunas repetidas ou que não pertencem ao arquivo XSV foram
+*       ignoradas.
+*       
+*
+*
+*   $FV Valor retornado
+*       XSV_CondRetOK - Condição de retorno de execução bem sucedida.
+*       XSV_CondRetFaltouMemoria - Não houve memória para alocação dinâmica
+*           da Handle.
+*       XSV_CondRetProblemaDeLista - Chamada de função de lista não retornou
+*           condição de execução bem sucedida.
+*       XSV_FalhaAoBuscarAPrimeiraLinhaDoArquivoDeInput - Busca da primeira
+*           linha do aqruivo de input falhou.
+*       XSV_CondRetFalhaNaAberturaDoArquivo - Abertura de arquivo de input 
+*           falhou.
+*       XSV_CondRetListaDeColunasNaoCriada - Tentou transformar uma lista de
+*           colunas não inicializada em conjunto.
+*       XSV_CondRetListaDeColunasVazia - Tentou transformar uma lista de
+*           colunas vazia em conjunto.
 *
 ****************************************************************************/
 XSV_tpCondRet XSV_TransformarListaDeColunasCondicionaisEmConjunto(XSV_tppHandleXSV pHandleXSV)
@@ -235,7 +315,7 @@ XSV_tpCondRet XSV_TransformarListaDeColunasCondicionaisEmConjunto(XSV_tppHandleX
 
     vConjuntoDeColunasCondicionais = 0ULL;
 
-    pArquivoDeInput = fopen(pHandleXSV->pNomeDoArquivoDeInput, "r");
+    pArquivoDeInput = fopen(pHandleXSV->pCaminhoParaArquivoDeInput, "r");
 
     if (!pArquivoDeInput)
         return XSV_CondRetFalhaNaAberturaDoArquivo;
@@ -324,7 +404,53 @@ XSV_tpCondRet XSV_TransformarListaDeColunasCondicionaisEmConjunto(XSV_tppHandleX
 *
 *	$FC Função:
 *       XSV Transformar lista de colunas para impressão em conjunto de
-*           colunas para impressão.
+*           colunas para impressão. Ordenar lista de colunas de acordo com a
+*           primeira linha do arquivo XSV. A ordem de impressão das colunas nas linhas
+*           do output proposta pelo usuário é armazenada.
+*
+*
+*   $AE Assertivas de entrada esperadas:
+*		Valem as assertivas estruturais da Handle de arquivo XSV.
+*       Handle de XSV foi inicializada (não é nula).
+*       Conjunto pode já ter sido criado (Handle será reprocessado e o
+*       conjunto sobrescrito).
+*       Se alguma das colunas não pertencer às colunas do arquivo, esta
+*       coluna será ignorada.
+*       A lista de colunas para impressão não deve estar vazia.
+*       Arquivo XSV de input e separador de colunas já devem ter sido
+*       definidos.
+*
+*
+*  $EP Parâmetros
+*       $P pHandleXSV - O parâmetro que receberá a Handle de arquivo XSV.
+*           Este parâmetro é passado por referência.
+*
+*
+*	$AS Assertivas de saída esperadas:
+*		Valem as assertivas estruturais da Handle de arquivo XSV.
+*       Lista de colunas para impressão foi transformada em conjunto.
+*       Lista de colunas para impressão foi ordenada de acordo com a primeira
+*       linha do arquivo XSV.
+*       Ordem de impressão das colunas proposta pelo usuário foi armazenada.
+*       Colunas repetidas ou que não pertencem ao arquivo XSV foram
+*       ignoradas.
+*       
+*
+*
+*   $FV Valor retornado
+*       XSV_CondRetOK - Condição de retorno de execução bem sucedida.
+*       XSV_CondRetFaltouMemoria - Não houve memória para alocação dinâmica
+*           da Handle.
+*       XSV_CondRetProblemaDeLista - Chamada de função de lista não retornou
+*           condição de execução bem sucedida.
+*       XSV_FalhaAoBuscarAPrimeiraLinhaDoArquivoDeInput - Busca da primeira
+*           linha do aqruivo de input falhou.
+*       XSV_CondRetFalhaNaAberturaDoArquivo - Abertura de arquivo de input 
+*           falhou.
+*       XSV_CondRetListaDeColunasNaoCriada - Tentou transformar uma lista de
+*           colunas não inicializada em conjunto.
+*       XSV_CondRetListaDeColunasVazia - Tentou transformar uma lista de
+*           colunas vazia em conjunto.
 *
 ****************************************************************************/
 XSV_tpCondRet XSV_TransformarListaDeColunasParaImpressaoEmConjunto(XSV_tppHandleXSV pHandleXSV)
@@ -361,7 +487,7 @@ XSV_tpCondRet XSV_TransformarListaDeColunasParaImpressaoEmConjunto(XSV_tppHandle
 
     vConjuntoDeColunasParaImpressao = 0ULL;
 
-    pArquivoDeInput = fopen(pHandleXSV->pNomeDoArquivoDeInput, "r");
+    pArquivoDeInput = fopen(pHandleXSV->pCaminhoParaArquivoDeInput, "r");
 
     if (!pArquivoDeInput)
         return XSV_CondRetFalhaNaAberturaDoArquivo;
@@ -384,7 +510,7 @@ XSV_tpCondRet XSV_TransformarListaDeColunasParaImpressaoEmConjunto(XSV_tppHandle
         *(pFinalColunaParaComparar) = '\0';
 
         vCondRetDeXSV = XSV_BuscaColunaNaListaDeColunasParaImpressao(pListaDeColunasParaImpressaoOrdemRequerida, pInicioColunaParaComparar, &vEstaNaListaDeSelecionadas);
-        
+
         if (vCondRetDeXSV == XSV_CondRetListaDeColunasVazia)
             break;
 
@@ -444,7 +570,7 @@ XSV_tpCondRet XSV_TransformarListaDeColunasParaImpressaoEmConjunto(XSV_tppHandle
         }
     }
 
-    if(!vConjuntoDeColunasParaImpressao)
+    if (!vConjuntoDeColunasParaImpressao)
         return XSV_CondRetListaDeColunasNaoCriada;
 
     vCondRetDeXSV = XSV_AjustaOrdemDaListaDeColunasParaImpressao(pListaDeColunasParaImpressaoOrdemRequerida, pListaDeColunasParaImpressaoOrdemDoArquivo);
@@ -463,7 +589,49 @@ XSV_tpCondRet XSV_TransformarListaDeColunasParaImpressaoEmConjunto(XSV_tppHandle
 /****************************************************************************
 *
 *	$FC Função:
-*       XSV Imprimir dados das colunas selcionadas.
+*       XSV Imprimir dados das colunas selecionadas.
+*
+*
+*   $AE Assertivas de entrada esperadas:
+*		Valem as assertivas estruturais da Handle de arquivo XSV.
+*       Handle de XSV foi inicializada (não é nula).
+*       Conjunto de colunas para impressão deve ter sido definido e não pode
+*       ser vazio.
+*       Conjunto de colunas condicionais deve ter sido definido e pode ser
+*       vazio.
+*       A lista de colunas para impressão não deve estar vazia e deve estar
+*       ordenada.
+*       A lista de colunas condicionais pode estar vazia, mas, caso não
+*       esteja, deve estar ordenada.
+*       Arquivo XSV de input e separador de colunas já devem ter sido
+*       definidos.
+*
+*
+*  $EP Parâmetros
+*       $P pHandleXSV - O parâmetro que receberá a Handle de arquivo XSV.
+*           Este parâmetro é passado por referência.
+*
+*
+*	$AS Assertivas de saída esperadas:
+*		Valem as assertivas estruturais da Handle de arquivo XSV.
+*       Arquivo XSV correspondente à Handle foi processado (linhas do arquivo
+*       foram impressas de acordo com o que o usuário definiu).*       
+*
+*
+*   $FV Valor retornado
+*       XSV_CondRetOK - Condição de retorno de execução bem sucedida.
+*       XSV_CondRetFaltouMemoria - Não houve memória para alocação dinâmica
+*           da Handle.
+*       XSV_CondRetProblemaDeLista - Chamada de função de lista não retornou
+*           condição de execução bem sucedida.
+*       XSV_FalhaAoBuscarAPrimeiraLinhaDoArquivoDeInput - Busca da primeira
+*           linha do aqruivo de input falhou.
+*       XSV_CondRetFalhaNaAberturaDoArquivo - Abertura de arquivo de input 
+*           falhou.
+*       XSV_CondRetListaDeColunasNaoCriada - Tentou transformar uma lista de
+*           colunas não inicializada em conjunto.
+*       XSV_CondRetListaDeColunasVazia - Tentou transformar uma lista de
+*           colunas vazia em conjunto.
 *
 ****************************************************************************/
 XSV_tpCondRet XSV_ImprimirDadosDeColunasSelecionadas(XSV_tppHandleXSV pHandleXSV)
@@ -494,7 +662,7 @@ XSV_tpCondRet XSV_ImprimirDadosDeColunasSelecionadas(XSV_tppHandleXSV pHandleXSV
 
     char vCondicaoFoiObedecida;
 
-    pArquivoDeInput = fopen(pHandleXSV->pNomeDoArquivoDeInput, "r");
+    pArquivoDeInput = fopen(pHandleXSV->pCaminhoParaArquivoDeInput, "r");
 
     if (!pArquivoDeInput)
         return XSV_CondRetFalhaNaAberturaDoArquivo;
@@ -720,8 +888,6 @@ XSV_tpCondRet XSV_ImprimirDadosDeColunasSelecionadas(XSV_tppHandleXSV pHandleXSV
     return XSV_CondRetOK;
 }
 
-/**************** Código das funções encapsuladas no módulo ****************/
-
 /****************************************************************************
 *
 *	$FC Função:
@@ -814,14 +980,15 @@ XSV_tpCondRet XSV_AjustaOrdemDaListaDeColunasParaImpressao(XSV_tppListaDeColunas
 *
 *
 *  $EP Parâmetros
-*       $P pParametroCondicao - A string à qual os valores da coluna serão
+*       $P pObjetoCondicional - A string à qual os valores da coluna serão
 *           comparados ou a função que define se os valores da coluna
 *           obedecem à condição.
 *           Este parâmetro é passado por referência.
-*       $P pValorDaColuna - O valor atual da coluna ao qual o parâmetro será
-*           comparado.
+*       $P pValorDaColuna - O valor atual da coluna ao qual o objeto
+*           condicional será comparado.
 *           Este parâmetro é passado por referência.
-*       $P vCondicaoDaColuna - A condição de comparação.
+*       $P vCondicaoDaColuna - A condição que descreve a comparação a ser
+*           feita entre os valores da coluna e o objeto condicional.
 *           Este parâmetro é passado por valor.
 *       $P pResultadoDaComparacao - O parâmetro que receberá o resultado da
 *           comparação entre o parâmetro e o valor atual da coluna.
@@ -839,41 +1006,41 @@ XSV_tpCondRet XSV_AjustaOrdemDaListaDeColunasParaImpressao(XSV_tppListaDeColunas
 *       XSV_CondRetOK - Condição de retorno de teste bem sucedido.
 *
 ****************************************************************************/
-XSV_tpCondRet XSV_VerificaColunaCondicional(void *pParametroCondicao, char pValorDaColuna[], XSV_tpCondicaoDeColuna vCondicaoDaColuna, char *pCondicaoFoiObedecida)
+XSV_tpCondRet XSV_VerificaColunaCondicional(void *pObjetoCondicional, char pValorDaColuna[], XSV_tpCondicaoDeColuna vCondicaoDaColuna, char *pCondicaoFoiObedecida)
 {
 
     switch (vCondicaoDaColuna)
     {
     case XSV_CondicaoIgual:
-        if (!strcmp((char *)pParametroCondicao, pValorDaColuna))
+        if (!strcmp((char *)pObjetoCondicional, pValorDaColuna))
             *pCondicaoFoiObedecida = 1;
         else
             *pCondicaoFoiObedecida = 0;
         break;
 
     case XSV_CondicaoDiferente:
-        if (strcmp((char *)pParametroCondicao, pValorDaColuna))
+        if (strcmp((char *)pObjetoCondicional, pValorDaColuna))
             *pCondicaoFoiObedecida = 1;
         else
             *pCondicaoFoiObedecida = 0;
         break;
 
     case XSV_CondicaoContem:
-        if (strstr(pValorDaColuna, (char *)pParametroCondicao))
+        if (strstr(pValorDaColuna, (char *)pObjetoCondicional))
             *pCondicaoFoiObedecida = 1;
         else
             *pCondicaoFoiObedecida = 0;
         break;
 
     case XSV_CondicaoNaoContem:
-        if (!strstr(pValorDaColuna, (char *)pParametroCondicao))
+        if (!strstr(pValorDaColuna, (char *)pObjetoCondicional))
             *pCondicaoFoiObedecida = 1;
         else
             *pCondicaoFoiObedecida = 0;
         break;
 
     case XSV_CondicaoPorFuncao:
-        if (((int (*)(char *))pParametroCondicao)(pValorDaColuna))
+        if (((int (*)(char *))pObjetoCondicional)(pValorDaColuna))
             *pCondicaoFoiObedecida = 1;
         else
             *pCondicaoFoiObedecida = 0;
