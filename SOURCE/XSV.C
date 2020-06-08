@@ -293,7 +293,7 @@ XSV_tpCondRet XSV_TransformarListaDeColunasCondicionaisEmConjunto(XSV_tppHandleX
 
     XSV_tpCondRet vCondRetDeXSV;
 
-    int vContadorDeColunas, vLenSeparador, i;
+    int vContadorDeColunas, vLenSeparador;
 
     char pLinhaDoArquivoDeInput[1024];
 
@@ -330,7 +330,7 @@ XSV_tpCondRet XSV_TransformarListaDeColunasCondicionaisEmConjunto(XSV_tppHandleX
     pFinalColunaParaComparar = pLinhaDoArquivoDeInput;
     vLenSeparador = strlen(pSeparadorDeColunas);
 
-    while ((pFinalColunaParaComparar = strstr(pFinalColunaParaComparar, pSeparadorDeColunas)))
+    while ((pFinalColunaParaComparar = strstr(pInicioColunaParaComparar, pSeparadorDeColunas)) || (pFinalColunaParaComparar = strstr(pInicioColunaParaComparar, "\r")) || (pFinalColunaParaComparar = strstr(pInicioColunaParaComparar, "\n")))
     {
 
         *(pFinalColunaParaComparar) = '\0';
@@ -361,34 +361,6 @@ XSV_tpCondRet XSV_TransformarListaDeColunasCondicionaisEmConjunto(XSV_tppHandleX
         vContadorDeColunas++;
         pFinalColunaParaComparar += vLenSeparador;
         pInicioColunaParaComparar = pFinalColunaParaComparar;
-    }
-
-    if (!pFinalColunaParaComparar)
-    {
-        for (i = 0; ' ' <= pInicioColunaParaComparar[i] && pInicioColunaParaComparar[i] <= '~'; i++)
-            ;
-
-        pInicioColunaParaComparar[i] = '\0';
-
-        vCondRetDeXSV = XSV_BuscaColunaNaListaDeColunasCondicionais(pListaDeColunasCondicionaisOrdemRequerida, pInicioColunaParaComparar, &vEstaNaListaDeSelecionadas);
-        if (vCondRetDeXSV != XSV_CondRetOK)
-            return vCondRetDeXSV;
-
-        if (vEstaNaListaDeSelecionadas)
-        {
-
-            vConjuntoDeColunasCondicionais |= 1ULL << vContadorDeColunas;
-
-            if (LIS_ObterConteudo(pListaDeColunasCondicionaisOrdemRequerida, (void **)&pColunaCondional) != LIS_CondRetOK)
-                return XSV_CondRetProblemaDeLista;
-
-            vCondRetDeXSV = XSV_AcrescentarColunaCondicionalNaLista(&pListaDeColunasCondicionaisOrdemDoArquivo, pColunaCondional->pNomeDaColunaCondicional, pColunaCondional->vParametroCondicao, pColunaCondional->vCondicaoDaColuna);
-            if (vCondRetDeXSV != XSV_CondRetOK)
-                return vCondRetDeXSV;
-
-            if (LIS_ExcluirNo(pListaDeColunasCondicionaisOrdemRequerida) != LIS_CondRetOK)
-                return XSV_CondRetOK;
-        }
     }
 
     if (LIS_DestruirLista(pListaDeColunasCondicionaisOrdemRequerida) != LIS_CondRetOK)
@@ -465,7 +437,7 @@ XSV_tpCondRet XSV_TransformarListaDeColunasParaImpressaoEmConjunto(XSV_tppHandle
 
     XSV_tpCondRet vCondRetDeXSV;
 
-    int vContadorDeColunas, vLenSeparador, i;
+    int vContadorDeColunas, vLenSeparador;
 
     char pLinhaDoArquivoDeInput[1024];
 
@@ -504,7 +476,7 @@ XSV_tpCondRet XSV_TransformarListaDeColunasParaImpressaoEmConjunto(XSV_tppHandle
     pFinalColunaParaComparar = pLinhaDoArquivoDeInput;
     vLenSeparador = strlen(pSeparadorDeColunas);
 
-    while ((pFinalColunaParaComparar = strstr(pFinalColunaParaComparar, pSeparadorDeColunas)))
+    while ((pFinalColunaParaComparar = strstr(pInicioColunaParaComparar, pSeparadorDeColunas)) || (pFinalColunaParaComparar = strstr(pInicioColunaParaComparar, "\r")) || (pFinalColunaParaComparar = strstr(pInicioColunaParaComparar, "\n")))
     {
 
         *(pFinalColunaParaComparar) = '\0';
@@ -537,37 +509,6 @@ XSV_tpCondRet XSV_TransformarListaDeColunasParaImpressaoEmConjunto(XSV_tppHandle
         vContadorDeColunas++;
         pFinalColunaParaComparar += vLenSeparador;
         pInicioColunaParaComparar = pFinalColunaParaComparar;
-    }
-
-    if (!pFinalColunaParaComparar)
-    {
-        for (i = 0; ' ' <= pInicioColunaParaComparar[i] && pInicioColunaParaComparar[i] <= '~'; i++)
-            ;
-
-        pInicioColunaParaComparar[i] = '\0';
-
-        vCondRetDeXSV = XSV_BuscaColunaNaListaDeColunasParaImpressao(pListaDeColunasParaImpressaoOrdemRequerida, pInicioColunaParaComparar, &vEstaNaListaDeSelecionadas);
-
-        if (vCondRetDeXSV != XSV_CondRetOK)
-            return vCondRetDeXSV;
-
-        if (vEstaNaListaDeSelecionadas)
-        {
-
-            vConjuntoDeColunasParaImpressao |= 1ULL << vContadorDeColunas;
-
-            if (LIS_ObterConteudo(pListaDeColunasParaImpressaoOrdemRequerida, (void **)&pColunaParaImpressao) != LIS_CondRetOK)
-                return XSV_CondRetProblemaDeLista;
-
-            vCondRetDeXSV = XSV_AcrescentarColunaParaImpressaoNaLista(&pListaDeColunasParaImpressaoOrdemDoArquivo, pColunaParaImpressao->pNomeDaColunaParaImpressao, pColunaParaImpressao->funcaoDeTransformacao, pColunaParaImpressao->vPosicaoRequerida);
-            if (vCondRetDeXSV != XSV_CondRetOK)
-                return vCondRetDeXSV;
-
-            pHandleXSV->vNumNos++;
-
-            if (LIS_ExcluirNo(pListaDeColunasParaImpressaoOrdemRequerida) != LIS_CondRetOK)
-                return XSV_CondRetOK;
-        }
     }
 
     if (!vConjuntoDeColunasParaImpressao)
@@ -654,7 +595,7 @@ XSV_tpCondRet XSV_ImprimirDadosDeColunasSelecionadas(XSV_tppHandleXSV pHandleXSV
 
     LIS_tpCondRet vCondRetDeLista;
 
-    int vContadorDeColunas, vLenSeparador, i;
+    int vContadorDeColunas, vLenSeparador;
 
     char pLinhaDoArquivoDeInput[1024];
 
@@ -737,9 +678,8 @@ XSV_tpCondRet XSV_ImprimirDadosDeColunasSelecionadas(XSV_tppHandleXSV pHandleXSV
         pInicioColunaParaComparar = pLinhaDoArquivoDeInput;
         pFinalColunaParaComparar = pLinhaDoArquivoDeInput;
 
-        while ((pFinalColunaParaComparar = strstr(pFinalColunaParaComparar, pSeparadorDeColunas)))
+        while ((pFinalColunaParaComparar = strstr(pInicioColunaParaComparar, pSeparadorDeColunas)) || (pFinalColunaParaComparar = strstr(pInicioColunaParaComparar, "\r")) || (pFinalColunaParaComparar = strstr(pInicioColunaParaComparar, "\n")))
         {
-
             *(pFinalColunaParaComparar) = '\0';
 
             if ((vConjuntoDeColunasCondicionais >> vContadorDeColunas) & 1ULL)
@@ -804,65 +744,6 @@ XSV_tpCondRet XSV_ImprimirDadosDeColunasSelecionadas(XSV_tppHandleXSV pHandleXSV
             vContadorDeColunas++;
             pFinalColunaParaComparar += vLenSeparador;
             pInicioColunaParaComparar = pFinalColunaParaComparar;
-        }
-
-        if (!pFinalColunaParaComparar)
-        {
-            for (i = 0; ' ' <= pInicioColunaParaComparar[i] && pInicioColunaParaComparar[i] <= '~'; i++)
-                ;
-
-            pInicioColunaParaComparar[i] = '\0';
-
-            if ((vConjuntoDeColunasCondicionais >> vContadorDeColunas) & 1ULL)
-            {
-
-                if (LIS_ObterConteudo(pListaDeColunasCondicionais, (void **)&pColunaCondicional) != LIS_CondRetOK)
-                    return XSV_CondRetProblemaDeLista;
-
-                vCondRetDeLista = LIS_IrParaProximoNo(pListaDeColunasCondicionais);
-
-                if (vCondRetDeLista != LIS_CondRetOK && vCondRetDeLista != LIS_CondRetNoNaoExiste)
-                    return XSV_CondRetProblemaDeLista;
-
-                vCondRetDeXSV = XSV_VerificaColunaCondicional(pColunaCondicional->vParametroCondicao, pInicioColunaParaComparar, pColunaCondicional->vCondicaoDaColuna, &vCondicaoFoiObedecida);
-                if (vCondRetDeXSV != XSV_CondRetOK)
-                    return vCondRetDeXSV;
-            }
-
-            if (vCondicaoFoiObedecida && (vConjuntoDeColunasParaImpressao >> vContadorDeColunas) & 1ULL)
-            {
-
-                if (LIS_ObterConteudo(pListaDeColunasParaImpressao, (void **)&pColunaParaImpressao) != LIS_CondRetOK)
-                    return XSV_CondRetProblemaDeLista;
-
-                if (pColunaParaImpressao->funcaoDeTransformacao)
-                    pColunaParaImpressao->funcaoDeTransformacao(pInicioColunaParaComparar);
-
-                if (!pColunaParaImpressao->vPosicaoRequerida)
-                {
-                    pStringAux = (char *)malloc(strlen(pInicioColunaParaComparar) + 1);
-                    if (!pStringAux)
-                        return XSV_CondRetFaltouMemoria;
-
-                    pStringAux = strcpy(pStringAux, pInicioColunaParaComparar);
-                    vCondRetDeXSV = XSV_AcrescentarStringNaListaDeStrings(pListaDeStringsParaImpressao, pStringAux, pColunaParaImpressao->vPosicaoRequerida);
-                    if (vCondRetDeXSV != XSV_CondRetOK)
-                        return vCondRetDeXSV;
-                }
-
-                else
-                {
-                    pStringAux = (char *)malloc(strlen(pInicioColunaParaComparar) + vLenSeparador + 1);
-                    if (!pStringAux)
-                        return XSV_CondRetFaltouMemoria;
-
-                    pStringAux = strcpy(pStringAux, pSeparadorDeColunas);
-                    pStringAux = strcat(pStringAux, pInicioColunaParaComparar);
-                    vCondRetDeXSV = XSV_AcrescentarStringNaListaDeStrings(pListaDeStringsParaImpressao, pStringAux, pColunaParaImpressao->vPosicaoRequerida);
-                    if (vCondRetDeXSV != XSV_CondRetOK)
-                        return vCondRetDeXSV;
-                }
-            }
         }
 
         if (vCondicaoFoiObedecida)
