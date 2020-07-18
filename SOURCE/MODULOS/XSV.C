@@ -11,7 +11,7 @@
 *       Separador de colunas pode ser conjunto de caracteres.
 *       Linhas do arquivo de input têm, no máximo, 1022 caracteres
 *       por casua da string de tamanho 1024 passada para fgets.
-*       (1022 chars + \0 + \n).
+*       (1022 chars + \r + \n ou 1023 chars + \n).
 *       Arquivo deve ter até 64 colunas por causa do conjunto de colunas
 *       representado por um unsigned long long (64 bits).
 *
@@ -30,6 +30,9 @@
 *                                   estão estão no arquivo ou ser vazia.
 *       6.00    jpp     25/05/2020  Função de execução do processamento.
 *                                   Documentação de funções encapsuladas.
+*       7.00    jpp     07/06/2020  Detecção correta do final da linha. Não é
+*                                   mais necessário testar a última coluna
+*                                   separadamente.
 *
 ****************************************************************************/
 
@@ -359,8 +362,7 @@ XSV_tpCondRet XSV_TransformarListaDeColunasCondicionaisEmConjunto(XSV_tppHandleX
         }
 
         vContadorDeColunas++;
-        pFinalColunaParaComparar += vLenSeparador;
-        pInicioColunaParaComparar = pFinalColunaParaComparar;
+        pInicioColunaParaComparar = pFinalColunaParaComparar + vLenSeparador;
     }
 
     if (LIS_DestruirLista(pListaDeColunasCondicionaisOrdemRequerida) != LIS_CondRetOK)
@@ -507,8 +509,7 @@ XSV_tpCondRet XSV_TransformarListaDeColunasParaImpressaoEmConjunto(XSV_tppHandle
         }
 
         vContadorDeColunas++;
-        pFinalColunaParaComparar += vLenSeparador;
-        pInicioColunaParaComparar = pFinalColunaParaComparar;
+        pInicioColunaParaComparar = pFinalColunaParaComparar + vLenSeparador;
     }
 
     if (!vConjuntoDeColunasParaImpressao)
@@ -741,9 +742,9 @@ XSV_tpCondRet XSV_ImprimirDadosDeColunasSelecionadas(XSV_tppHandleXSV pHandleXSV
                 }
             }
 
-            vContadorDeColunas++;
-            pFinalColunaParaComparar += vLenSeparador;
-            pInicioColunaParaComparar = pFinalColunaParaComparar;
+        vContadorDeColunas++;
+        pInicioColunaParaComparar = pFinalColunaParaComparar + vLenSeparador;
+
         }
 
         if (vCondicaoFoiObedecida)
