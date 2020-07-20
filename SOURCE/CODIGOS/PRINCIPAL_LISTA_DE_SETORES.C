@@ -1,4 +1,4 @@
-#include "SOURCE/XSV.H"
+#include "../MODULOS/XSV.H"
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
@@ -18,7 +18,7 @@ int main(int argc, char **argv)
 
     char pSeparadorDeColunas[] = ";";
 
-    char pNomeDoArquivoDeInput[] = "CAD.CSV";
+    char pNomeDoArquivoDeInput[] = "../CAD.CSV";
 
     if (XSV_CriarHandleDeArquivoXSV(&pHandleXSV) != XSV_CondRetOK)
     {
@@ -66,19 +66,6 @@ int main(int argc, char **argv)
         exit(1);
     }
     fprintf(stderr, "Adição de coluna para impressão na handle do arquivo XSV bem sucedida.\n");
-
-    if (XSV_AcrescentarColunaCondicionalAoHandle(pHandleXSV, "SIT", (void *)"ATIVO", XSV_CondicaoIgual) != XSV_CondRetOK)
-    {
-        fprintf(stderr, "Problema na adição de coluna condicional na handle do arquivo XSV.\n");
-        if (XSV_DestruirHandleDeArquivoXSV(pHandleXSV) != XSV_CondRetOK)
-        {
-            fprintf(stderr, "Problema na destruição da handle do arquivo XSV.\n");
-            exit(1);
-        }
-        fprintf(stderr, "Destruição da handle do arquivo XSV bem sucedida.\n");
-        exit(1);
-    }
-    fprintf(stderr, "Adição de coluna condicional na handle do arquivo XSV bem sucedida.\n");
 
     if (XSV_ExecutarProcessamentoDoArquivoXSV(pHandleXSV) != XSV_CondRetOK)
     {

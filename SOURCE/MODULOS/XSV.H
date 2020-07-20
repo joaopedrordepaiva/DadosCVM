@@ -19,6 +19,9 @@
 *                                   no lugar das de de transformação em
 *                                   conjunto e impressão. Documentação de
 *                                   funções anteriores e da função nova.
+*       4.00    jpp     19/07/2020  Troca de char* para const char* em certas
+*                                   funções para poder passar strings
+*                                   literais nas chamadas.
 *
 *   $ED Descrição do módulo
 *       Este módulo implementa um conjunto de funções para operar arquivos
@@ -176,7 +179,7 @@ XSV_tpCondRet XSV_DestruirHandleDeArquivoXSV(XSV_tppHandleXSV pHandleXSV);
 *       XSV_CondRetOK - Condição de retorno de execução bem sucedida.
 *
 ****************************************************************************/
-XSV_tpCondRet XSV_DefinirSeparadorDoInput(XSV_tppHandleXSV pHandleXSV, char pSeparadorDeColunas[]);
+XSV_tpCondRet XSV_DefinirSeparadorDoInput(XSV_tppHandleXSV pHandleXSV, const char pSeparadorDeColunas[]);
 
 /****************************************************************************
 *
@@ -209,7 +212,7 @@ XSV_tpCondRet XSV_DefinirSeparadorDoInput(XSV_tppHandleXSV pHandleXSV, char pSep
 *       XSV_CondRetOK - Condição de retorno de execução bem sucedida.
 *
 ****************************************************************************/
-XSV_tpCondRet XSV_DefinirOpArquivoInput(XSV_tppHandleXSV pHandleXSV, char pCaminhoParaArquivoDeInput[]);
+XSV_tpCondRet XSV_DefinirOpArquivoInput(XSV_tppHandleXSV pHandleXSV, const char pCaminhoParaArquivoDeInput[]);
 
 /****************************************************************************
 *
@@ -262,7 +265,7 @@ XSV_tpCondRet XSV_DefinirOpArquivoInput(XSV_tppHandleXSV pHandleXSV, char pCamin
 *           condição de execução bem sucedida.
 *
 ****************************************************************************/
-XSV_tpCondRet XSV_AcrescentarColunaCondicionalAoHandle(XSV_tppHandleXSV pHandleXSV, char pNomeDaColunaCondicional[], void *pObjetoCondicional, XSV_tpCondicaoDeColuna vCondicaoDaColuna);
+XSV_tpCondRet XSV_AcrescentarColunaCondicionalAoHandle(XSV_tppHandleXSV pHandleXSV, const char *pNomeDaColunaCondicional, void *pObjetoCondicional, XSV_tpCondicaoDeColuna vCondicaoDaColuna);
 
 /****************************************************************************
 *
@@ -311,7 +314,7 @@ XSV_tpCondRet XSV_AcrescentarColunaCondicionalAoHandle(XSV_tppHandleXSV pHandleX
 *           condição de execução bem sucedida.
 *
 ****************************************************************************/
-XSV_tpCondRet XSV_AcrescentarColunaParaImpressaoAoHandle(XSV_tppHandleXSV pHandleXSV, char pNomeDaColunaParaImpressao[], void (*funcaoDeTransformacao)(char *));
+XSV_tpCondRet XSV_AcrescentarColunaParaImpressaoAoHandle(XSV_tppHandleXSV pHandleXSV, const char *pNomeDaColunaParaImpressao, void (*funcaoDeTransformacao)(char *));
 
 /****************************************************************************
 *
