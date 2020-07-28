@@ -7,15 +7,15 @@
 
 void stringRemoveZeros(char pString[])
 {
-    if (pString[0] != '0')
-        return;
+    int i;
 
-    for (int i = 1; pString[i]; i++)
-        if(pString[i] != '0')
-        {
-            strcpy(pString,pString+i);
-            return;
-        }
+    for (i = 0; pString[i] == '0'; i++)
+        ;
+
+    if (i)
+        strcpy(pString, pString + i);
+
+    return;
 }
 
 int main(int argc, char **argv)

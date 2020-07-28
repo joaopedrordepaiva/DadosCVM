@@ -6,20 +6,53 @@
 
 void stringUpper(char pString[])
 {
-    for (int i = 0; pString[i]; i++)
-        pString[i] = toupper((unsigned char)pString[i]);
+    int i, j;
 
+    i = j = 0;
+
+    while (pString[j])
+    {
+        if (pString[j] != '/' && pString[j] != '.')
+        {
+            pString[i] = toupper(pString[j]);
+            i++;
+        }
+
+        j++;
+    }
+    pString[i] = pString[j];
     return;
 }
+
+void stringRemoveCaracteresEspeciais(char pString[])
+{
+    int i, j;
+
+    i = j = 0;
+
+    while (pString[j])
+    {
+        if (pString[j] != '/' && pString[j] != '.')
+        {
+            pString[i] = pString[j];
+            i++;
+        }
+
+        j++;
+    }
+    pString[i] = pString[j];
+    return;
+}
+
+/* abcd//ewd/ewd */
+/* abcdewdewd */
 
 int main(int argc, char **argv)
 {
     XSV_tppHandleXSV pHandleXSV;
 
     const char pSeparadorDeColunas[] = ";";
-    const char *pVetorDeColunasSelecionadas[] = {"CD_CVM", "DENOM_SOCIAL"};
-
-    const char pNomeDoArquivoDeInput[] = "INFORMACOES_CONTABEIS/CAD/CAD_CIA_ABERTA.CSV";
+    const char pNomeDoArquivoDeInput[] = "INFORMACOES_CONTABEIS/CAD/CAD.csv";
 
     if (XSV_CriarHandleDeArquivoXSV(&pHandleXSV) != XSV_CondRetOK)
     {
@@ -44,14 +77,13 @@ int main(int argc, char **argv)
         exit(1);
     }
 
-    for (int i = 0; i < 2; i++)
-        if (XSV_AcrescentarColunaParaImpressaoAoHandle(pHandleXSV, pVetorDeColunasSelecionadas[i], NULL) != XSV_CondRetOK)
-        {
-            fprintf(stderr, "Problema na adição de coluna para impressão na handle do arquivo XSV.\n");
-            if (XSV_DestruirHandleDeArquivoXSV(pHandleXSV) != XSV_CondRetOK)
-                fprintf(stderr, "Problema na destruição da handle do arquivo XSV.\n");
-            exit(1);
-        }
+    if (XSV_AcrescentarColunaParaImpressaoAoHandle(pHandleXSV, "CD_CVM", NULL) != XSV_CondRetOK)
+    {
+        fprintf(stderr, "Problema na adição de coluna para impressão na handle do arquivo XSV.\n");
+        if (XSV_DestruirHandleDeArquivoXSV(pHandleXSV) != XSV_CondRetOK)
+            fprintf(stderr, "Problema na destruição da handle do arquivo XSV.\n");
+        exit(1);
+    }
 
     if (XSV_AcrescentarColunaParaImpressaoAoHandle(pHandleXSV, "SETOR_ATIV", stringUpper) != XSV_CondRetOK)
     {
@@ -61,7 +93,23 @@ int main(int argc, char **argv)
         exit(1);
     }
 
+    if (XSV_AcrescentarColunaParaImpressaoAoHandle(pHandleXSV, "DENOM_SOCIAL", stringRemoveCaracteresEspeciais) != XSV_CondRetOK)
+    {
+        fprintf(stderr, "Problema na adição de coluna para impressão na handle do arquivo XSV.\n");
+        if (XSV_DestruirHandleDeArquivoXSV(pHandleXSV) != XSV_CondRetOK)
+            fprintf(stderr, "Problema na destruição da handle do arquivo XSV.\n");
+        exit(1);
+    }
+
     if (XSV_AcrescentarColunaCondicionalAoHandle(pHandleXSV, "SIT", (void *)"ATIVO", XSV_CondicaoIgual) != XSV_CondRetOK)
+    {
+        fprintf(stderr, "Problema na adição de coluna condicional na handle do arquivo XSV.\n");
+        if (XSV_DestruirHandleDeArquivoXSV(pHandleXSV) != XSV_CondRetOK)
+            fprintf(stderr, "Problema na destruição da handle do arquivo XSV.\n");
+        exit(1);
+    }
+
+    if (XSV_AcrescentarColunaCondicionalAoHandle(pHandleXSV, "TP_MERC", (void *)"BOLSA", XSV_CondicaoIgual) != XSV_CondRetOK)
     {
         fprintf(stderr, "Problema na adição de coluna condicional na handle do arquivo XSV.\n");
         if (XSV_DestruirHandleDeArquivoXSV(pHandleXSV) != XSV_CondRetOK)
