@@ -42,11 +42,16 @@
 *
 ****************************************************************************/
 
-#include "LISTA.H"
-#include "XSV.H"
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
+#include <iostream>
+#include <fstream>
+#include <string>
+#include <limits>
+#include <cassert>
+#include <list>
+#include <bitset>
+#include <windows.h>
+#include "LISTA.h"
+#include "XSV.hpp"
 
 /********************* Variáveis encapuladas no módulo *********************/
 
@@ -61,26 +66,26 @@ struct XSV_tagHandleXSV
     XSV_tppListaDeColunasParaImpressao pListaDeColunasParaImpressao;
     XSV_tppListaDeColunasCondicionais pListaDeColunasCondicionais;
 
-    size_t vConjuntoDeColunasParaImpressao;
-    size_t vConjuntoDeColunasCondicionais;
+    std::bitset<256> vConjuntoDeColunasParaImpressao;
+    std::bitset<256> vConjuntoDeColunasCondicionais;
 
-    const char *pCaminhoParaArquivoDeInput;
-    const char *pSeparadorDeColunas;
+    std::string pCaminhoParaArquivoDeInput;
+    std::string pSeparadorDeColunas;
 
-    unsigned char vNumNos;
+    int8_t vNumNos;
 };
 
 typedef struct XSV_tpColunaParaImpressao
 {
-    const char *pNomeDaColunaParaImpressao;
-    void (*funcaoDeTransformacao)(char *);
-    unsigned char vPosicaoRequerida;
+    std::string pNomeDaColunaParaImpressao;
+    void (*funcaoDeTransformacao)(std::string);
+    int8_t vPosicaoRequerida;
 
 } * XSV_tppColunaParaImpressao;
 
 typedef struct XSV_tpColunaCondicional
 {
-    const char *pNomeDaColunaCondicional;
+    std::string pNomeDaColunaCondicional;
     void *vParametroCondicao;
     XSV_tpCondicaoDeColuna vCondicaoDaColuna;
 
@@ -92,16 +97,16 @@ static XSV_tpCondRet XSV_ImprimirDadosDeColunasSelecionadas(XSV_tppHandleXSV pHa
 static XSV_tpCondRet XSV_TransformarListaDeColunasParaImpressaoEmConjunto(XSV_tppHandleXSV pHandleXSV);
 static XSV_tpCondRet XSV_TransformarListaDeColunasCondicionaisEmConjunto(XSV_tppHandleXSV pHandleXSV);
 static XSV_tpCondRet XSV_AjustaOrdemDaListaDeColunasParaImpressao(XSV_tppListaDeColunasParaImpressao pListaDeColunasParaImpressaoOrdemRequerida, XSV_tppListaDeColunasParaImpressao pListaDeColunasParaImpressaoOrdemDoArquivo);
-static XSV_tpCondRet XSV_VerificaColunaCondicional(void *pParametroCondicao, char pValorDaColuna[], XSV_tpCondicaoDeColuna vCondicaoDaColuna, char *pCondicaoFoiObedecida);
-static XSV_tpCondRet XSV_AcrescentarColunaCondicionalNaLista(XSV_tppListaDeColunasCondicionais *ppListaDeColunasCondicionais, const char pNomeDaColunaCondicional[], void *vParametroCondicao, XSV_tpCondicaoDeColuna vCondicaoDaColuna);
-static XSV_tpCondRet XSV_AcrescentarColunaParaImpressaoNaLista(XSV_tppListaDeColunasParaImpressao *ppListaDeColunasParaImpressao, const char pNomeDaColunaParaImpressao[], void (*funcaoDeTransformacao)(char *), unsigned char vPosicaoRequerida);
+static XSV_tpCondRet XSV_VerificaColunaCondicional(void *pParametroCondicao, std::string pValorDaColuna, XSV_tpCondicaoDeColuna vCondicaoDaColuna, std::string pCondicaoFoiObedecida);
+static XSV_tpCondRet XSV_AcrescentarColunaCondicionalNaLista(XSV_tppListaDeColunasCondicionais *ppListaDeColunasCondicionais, std::string pNomeDaColunaCondicional, void *vParametroCondicao, XSV_tpCondicaoDeColuna vCondicaoDaColuna);
+static XSV_tpCondRet XSV_AcrescentarColunaParaImpressaoNaLista(XSV_tppListaDeColunasParaImpressao *ppListaDeColunasParaImpressao, std::string pNomeDaColunaParaImpressao, void (*funcaoDeTransformacao)(std::string), int8_t vPosicaoRequerida);
 static XSV_tpCondRet XSV_CriarListaDeColunas(LIS_tppCabecaLista *ppListaDeColunasSelecionadas);
-static XSV_tpCondRet XSV_AcrescentarStringNaListaDeStrings(XSV_tppListaDeStringsParaImpressao pListaDeStringsParaImpressao, char pString[], unsigned char vPosicao);
+static XSV_tpCondRet XSV_AcrescentarStringNaListaDeStrings(XSV_tppListaDeStringsParaImpressao pListaDeStringsParaImpressao, std::string pString[], int8_t vPosicao);
 static XSV_tpCondRet XSV_ImprimirListaDeStrings(XSV_tppListaDeStringsParaImpressao pListaDeStringsParaImpressao);
 static XSV_tpCondRet XSV_LiberarConteudoDosNosDaListaDeStrings(XSV_tppListaDeStringsParaImpressao pListaDeStringsParaImpressao);
-static XSV_tpCondRet XSV_CriarListaDeStrings(XSV_tppListaDeStringsParaImpressao *ppListaDeStringsParaImpressao, unsigned char vNumNos);
-static XSV_tpCondRet XSV_BuscaColunaNaListaDeColunasCondicionais(XSV_tppListaDeColunasCondicionais pListaDeColunasCondicionais, char pNomeDaColunaBuscada[], char *pResultadoDaBusca);
-static XSV_tpCondRet XSV_BuscaColunaNaListaDeColunasParaImpressao(XSV_tppListaDeColunasParaImpressao pListaDeColunasParaImpressao, char pNomeDaColunaBuscada[], char *pResultadoDaBusca);
+static XSV_tpCondRet XSV_CriarListaDeStrings(XSV_tppListaDeStringsParaImpressao *ppListaDeStringsParaImpressao, int8_t vNumNos);
+static XSV_tpCondRet XSV_BuscaColunaNaListaDeColunasCondicionais(XSV_tppListaDeColunasCondicionais pListaDeColunasCondicionais, std::string pNomeDaColunaBuscada, std::string pResultadoDaBusca);
+static XSV_tpCondRet XSV_BuscaColunaNaListaDeColunasParaImpressao(XSV_tppListaDeColunasParaImpressao pListaDeColunasParaImpressao, std::string pNomeDaColunaBuscada, std::string pResultadoDaBusca);
 
 /**************** Código das funções exportadas pelo módulo ****************/
 
@@ -151,7 +156,7 @@ XSV_tpCondRet XSV_DestruirHandleDeArquivoXSV(XSV_tppHandleXSV pHandleXSV)
 *       XSV Definir string que separa as colunas do arquivo de input.
 *
 ****************************************************************************/
-XSV_tpCondRet XSV_DefinirSeparadorDoInput(XSV_tppHandleXSV pHandleXSV, const char *pSeparadorDeColunas)
+XSV_tpCondRet XSV_DefinirSeparadorDoInput(XSV_tppHandleXSV pHandleXSV, std::string pSeparadorDeColunas)
 {
 
     pHandleXSV->pSeparadorDeColunas = pSeparadorDeColunas;
@@ -165,7 +170,7 @@ XSV_tpCondRet XSV_DefinirSeparadorDoInput(XSV_tppHandleXSV pHandleXSV, const cha
 *       XSV Definir arquivo de tipo XSV de onde os dados serão extraídos.
 *
 ****************************************************************************/
-XSV_tpCondRet XSV_DefinirOpArquivoInput(XSV_tppHandleXSV pHandleXSV, const char *pCaminhoParaArquivoDeInput)
+XSV_tpCondRet XSV_DefinirOpArquivoInput(XSV_tppHandleXSV pHandleXSV, std::string pCaminhoParaArquivoDeInput)
 {
     pHandleXSV->pCaminhoParaArquivoDeInput = pCaminhoParaArquivoDeInput;
 
@@ -179,7 +184,7 @@ XSV_tpCondRet XSV_DefinirOpArquivoInput(XSV_tppHandleXSV pHandleXSV, const char 
 *           de colunas condicionais do HandleXSV.
 *
 ****************************************************************************/
-XSV_tpCondRet XSV_AcrescentarColunaCondicionalAoHandle(XSV_tppHandleXSV pHandleXSV, const char *pNomeDaColunaCondicional, void *pObjetoCondicional, XSV_tpCondicaoDeColuna vCondicaoDaColuna)
+XSV_tpCondRet XSV_AcrescentarColunaCondicionalAoHandle(XSV_tppHandleXSV pHandleXSV, std::string pNomeDaColunaCondicional, void *pObjetoCondicional, XSV_tpCondicaoDeColuna vCondicaoDaColuna)
 {
     XSV_tpCondRet vCondRetDeXSV;
 
@@ -198,7 +203,7 @@ XSV_tpCondRet XSV_AcrescentarColunaCondicionalAoHandle(XSV_tppHandleXSV pHandleX
 *           de colunas para impressão do HandleXSV.
 *
 ****************************************************************************/
-XSV_tpCondRet XSV_AcrescentarColunaParaImpressaoAoHandle(XSV_tppHandleXSV pHandleXSV, const char *pNomeDaColunaParaImpressao, void (*funcaoDeTransformacao)(char *))
+XSV_tpCondRet XSV_AcrescentarColunaParaImpressaoAoHandle(XSV_tppHandleXSV pHandleXSV, std::string pNomeDaColunaParaImpressao, void (*funcaoDeTransformacao)(std::string))
 {
     XSV_tpCondRet vCondRetDeXSV;
 
@@ -292,23 +297,22 @@ XSV_tpCondRet XSV_ExecutarProcessamentoDoArquivoXSV(XSV_tppHandleXSV pHandleXSV)
 ****************************************************************************/
 XSV_tpCondRet XSV_TransformarListaDeColunasCondicionaisEmConjunto(XSV_tppHandleXSV pHandleXSV)
 {
-    FILE *pArquivoDeInput;
 
     XSV_tppListaDeColunasCondicionais pListaDeColunasCondicionaisOrdemRequerida, pListaDeColunasCondicionaisOrdemDoArquivo;
 
     XSV_tppColunaCondicional pColunaCondional;
 
-    size_t vConjuntoDeColunasCondicionais;
+    std::bitset<256> vConjuntoDeColunasCondicionais;
 
     XSV_tpCondRet vCondRetDeXSV;
 
-    int vContadorDeColunas, vLenSeparador;
+    int vContadorDeColunas;
 
-    char pLinhaDoArquivoDeInput[1024];
+    std::string pLinhaDoArquivoDeInput;
 
-    char *pInicioColunaParaComparar, *pFinalColunaParaComparar;
+    std::string pInicioColunaParaComparar, pFinalColunaParaComparar;
 
-    const char *pSeparadorDeColunas;
+    std::string pSeparadorDeColunas;
 
     char vEstaNaListaDeSelecionadas;
 
@@ -326,26 +330,22 @@ XSV_tpCondRet XSV_TransformarListaDeColunasCondicionaisEmConjunto(XSV_tppHandleX
 
     vConjuntoDeColunasCondicionais = 0ULL;
 
-    pArquivoDeInput = fopen(pHandleXSV->pCaminhoParaArquivoDeInput, "r");
+    std::ifstream pArquivoDeInput(pHandleXSV->pCaminhoParaArquivoDeInput);
 
-    if (!pArquivoDeInput)
+    if (!pArquivoDeInput.is_open())
         return XSV_CondRetFalhaNaAberturaDoArquivo;
 
-    if (!fgets(pLinhaDoArquivoDeInput, 1024, pArquivoDeInput))
+    if (!std::getline(pArquivoDeInput,pLinhaDoArquivoDeInput))
         return XSV_FalhaAoBuscarAPrimeiraLinhaDoArquivoDeInput;
 
-    fclose(pArquivoDeInput);
+    pArquivoDeInput.close();
 
     vContadorDeColunas = 0;
     pInicioColunaParaComparar = pLinhaDoArquivoDeInput;
     pFinalColunaParaComparar = pLinhaDoArquivoDeInput;
-    vLenSeparador = strlen(pSeparadorDeColunas);
 
-    while ((pFinalColunaParaComparar = strstr(pInicioColunaParaComparar, pSeparadorDeColunas)) || (pFinalColunaParaComparar = strstr(pInicioColunaParaComparar, "\r")) || (pFinalColunaParaComparar = strstr(pInicioColunaParaComparar, "\n")))
+    while ((pFinalColunaParaComparar = pInicioColunaParaComparar.substr(0,pInicioColunaParaComparar.find(pSeparadorDeColunas))) || (pFinalColunaParaComparar = strstr(pInicioColunaParaComparar, "\r")) || (pFinalColunaParaComparar = strstr(pInicioColunaParaComparar, "\n")))
     {
-
-        *(pFinalColunaParaComparar) = '\0';
-
         vCondRetDeXSV = XSV_BuscaColunaNaListaDeColunasCondicionais(pListaDeColunasCondicionaisOrdemRequerida, pInicioColunaParaComparar, &vEstaNaListaDeSelecionadas);
 
         if (vCondRetDeXSV == XSV_CondRetListaDeColunasVazia)
@@ -356,7 +356,7 @@ XSV_tpCondRet XSV_TransformarListaDeColunasCondicionaisEmConjunto(XSV_tppHandleX
 
         if (vEstaNaListaDeSelecionadas)
         {
-            vConjuntoDeColunasCondicionais |= 1ULL << vContadorDeColunas;
+            vConjuntoDeColunasCondicionais.set(vContadorDeColunas, true);
 
             if (LIS_ObterConteudo(pListaDeColunasCondicionaisOrdemRequerida, (void **)&pColunaCondional) != LIS_CondRetOK)
                 return XSV_CondRetProblemaDeLista;
@@ -370,7 +370,7 @@ XSV_tpCondRet XSV_TransformarListaDeColunasCondicionaisEmConjunto(XSV_tppHandleX
         }
 
         vContadorDeColunas++;
-        pInicioColunaParaComparar = pFinalColunaParaComparar + vLenSeparador;
+        pInicioColunaParaComparar = &pFinalColunaParaComparar[pSeparadorDeColunas.length()];
     }
 
     if (LIS_DestruirLista(pListaDeColunasCondicionaisOrdemRequerida) != LIS_CondRetOK)
@@ -443,7 +443,7 @@ XSV_tpCondRet XSV_TransformarListaDeColunasParaImpressaoEmConjunto(XSV_tppHandle
 
     XSV_tppColunaParaImpressao pColunaParaImpressao;
 
-    size_t vConjuntoDeColunasParaImpressao;
+    std::bitset<256> vConjuntoDeColunasParaImpressao;
 
     XSV_tpCondRet vCondRetDeXSV;
 
@@ -451,9 +451,9 @@ XSV_tpCondRet XSV_TransformarListaDeColunasParaImpressaoEmConjunto(XSV_tppHandle
 
     char pLinhaDoArquivoDeInput[1024];
 
-    char *pInicioColunaParaComparar, *pFinalColunaParaComparar;
+    std::string pInicioColunaParaComparar, *pFinalColunaParaComparar;
 
-    const char *pSeparadorDeColunas;
+    std::string pSeparadorDeColunas;
 
     char vEstaNaListaDeSelecionadas;
 
@@ -600,7 +600,7 @@ XSV_tpCondRet XSV_ImprimirDadosDeColunasSelecionadas(XSV_tppHandleXSV pHandleXSV
 
     XSV_tppListaDeStringsParaImpressao pListaDeStringsParaImpressao;
 
-    size_t vConjuntoDeColunasCondicionais, vConjuntoDeColunasParaImpressao;
+    std::bitset<256> vConjuntoDeColunasCondicionais, vConjuntoDeColunasParaImpressao;
 
     XSV_tpCondRet vCondRetDeXSV;
 
@@ -610,9 +610,9 @@ XSV_tpCondRet XSV_ImprimirDadosDeColunasSelecionadas(XSV_tppHandleXSV pHandleXSV
 
     char pLinhaDoArquivoDeInput[1024];
 
-    char *pInicioColunaParaComparar, *pFinalColunaParaComparar, *pStringAux;
+    std::string pInicioColunaParaComparar, *pFinalColunaParaComparar, *pStringAux;
 
-    const char *pSeparadorDeColunas;
+    std::string pSeparadorDeColunas;
 
     char vCondicaoFoiObedecida;
 
@@ -646,7 +646,7 @@ XSV_tpCondRet XSV_ImprimirDadosDeColunasSelecionadas(XSV_tppHandleXSV pHandleXSV
 
         if (!pColunaParaImpressao->vPosicaoRequerida)
         {
-            pStringAux = (char *)malloc(strlen(pColunaParaImpressao->pNomeDaColunaParaImpressao) + 1);
+            pStringAux = (std::string)malloc(strlen(pColunaParaImpressao->pNomeDaColunaParaImpressao) + 1);
             if (!pStringAux)
                 return XSV_CondRetFaltouMemoria;
 
@@ -659,7 +659,7 @@ XSV_tpCondRet XSV_ImprimirDadosDeColunasSelecionadas(XSV_tppHandleXSV pHandleXSV
         else
         {
 
-            pStringAux = (char *)malloc(strlen(pColunaParaImpressao->pNomeDaColunaParaImpressao) + vLenSeparador + 1);
+            pStringAux = (std::string)malloc(strlen(pColunaParaImpressao->pNomeDaColunaParaImpressao) + vLenSeparador + 1);
             if (!pStringAux)
                 return XSV_CondRetFaltouMemoria;
 
@@ -732,7 +732,7 @@ XSV_tpCondRet XSV_ImprimirDadosDeColunasSelecionadas(XSV_tppHandleXSV pHandleXSV
 
                 if (!pColunaParaImpressao->vPosicaoRequerida)
                 {
-                    pStringAux = (char *)malloc(strlen(pInicioColunaParaComparar) + 1);
+                    pStringAux = (std::string)malloc(strlen(pInicioColunaParaComparar) + 1);
                     if (!pStringAux)
                         return XSV_CondRetFaltouMemoria;
 
@@ -744,7 +744,7 @@ XSV_tpCondRet XSV_ImprimirDadosDeColunasSelecionadas(XSV_tppHandleXSV pHandleXSV
 
                 else
                 {
-                    pStringAux = (char *)malloc(strlen(pInicioColunaParaComparar) + vLenSeparador + 1);
+                    pStringAux = (std::string)malloc(strlen(pInicioColunaParaComparar) + vLenSeparador + 1);
                     if (!pStringAux)
                         return XSV_CondRetFaltouMemoria;
 
@@ -856,7 +856,7 @@ XSV_tpCondRet XSV_AjustaOrdemDaListaDeColunasParaImpressao(XSV_tppListaDeColunas
             if (LIS_ObterConteudo(pListaDeColunasParaImpressaoOrdemDoArquivo, (void **)&pColunaParaImpressao) != LIS_CondRetOK)
                 return XSV_CondRetProblemaDeLista;
 
-            if ((int) pColunaParaImpressao->vPosicaoRequerida > vValorNaoPertencenteAsColunas - vAjustaValoresSubtracao)
+            if ((int)pColunaParaImpressao->vPosicaoRequerida > vValorNaoPertencenteAsColunas - vAjustaValoresSubtracao)
                 pColunaParaImpressao->vPosicaoRequerida--;
 
         } while (LIS_IrParaProximoNo(pListaDeColunasParaImpressaoOrdemDoArquivo) == LIS_CondRetOK);
@@ -905,41 +905,41 @@ XSV_tpCondRet XSV_AjustaOrdemDaListaDeColunasParaImpressao(XSV_tppListaDeColunas
 *       XSV_CondRetOK - Condição de retorno de teste bem sucedido.
 *
 ****************************************************************************/
-XSV_tpCondRet XSV_VerificaColunaCondicional(void *pObjetoCondicional, char pValorDaColuna[], XSV_tpCondicaoDeColuna vCondicaoDaColuna, char *pCondicaoFoiObedecida)
+XSV_tpCondRet XSV_VerificaColunaCondicional(void *pObjetoCondicional, char pValorDaColuna[], XSV_tpCondicaoDeColuna vCondicaoDaColuna, std::string pCondicaoFoiObedecida)
 {
 
     switch (vCondicaoDaColuna)
     {
     case XSV_CondicaoIgual:
-        if (!strcmp((char *)pObjetoCondicional, pValorDaColuna))
+        if (!strcmp((std::string)pObjetoCondicional, pValorDaColuna))
             *pCondicaoFoiObedecida = 1;
         else
             *pCondicaoFoiObedecida = 0;
         break;
 
     case XSV_CondicaoDiferente:
-        if (strcmp((char *)pObjetoCondicional, pValorDaColuna))
+        if (strcmp((std::string)pObjetoCondicional, pValorDaColuna))
             *pCondicaoFoiObedecida = 1;
         else
             *pCondicaoFoiObedecida = 0;
         break;
 
     case XSV_CondicaoContem:
-        if (strstr(pValorDaColuna, (char *)pObjetoCondicional))
+        if (strstr(pValorDaColuna, (std::string)pObjetoCondicional))
             *pCondicaoFoiObedecida = 1;
         else
             *pCondicaoFoiObedecida = 0;
         break;
 
     case XSV_CondicaoNaoContem:
-        if (!strstr(pValorDaColuna, (char *)pObjetoCondicional))
+        if (!strstr(pValorDaColuna, (std::string)pObjetoCondicional))
             *pCondicaoFoiObedecida = 1;
         else
             *pCondicaoFoiObedecida = 0;
         break;
 
     case XSV_CondicaoPorFuncao:
-        if (((int (*)(char *))pObjetoCondicional)(pValorDaColuna))
+        if (((int (*)(std::string))pObjetoCondicional)(pValorDaColuna))
             *pCondicaoFoiObedecida = 1;
         else
             *pCondicaoFoiObedecida = 0;
@@ -995,7 +995,7 @@ XSV_tpCondRet XSV_VerificaColunaCondicional(void *pObjetoCondicional, char pValo
 *       XSV_CondRetFaltouMemoria - Alocação dinâmica de memória falhou.
 *
 ****************************************************************************/
-XSV_tpCondRet XSV_AcrescentarColunaCondicionalNaLista(XSV_tppListaDeColunasCondicionais *ppListaDeColunasCondicionais, const char *pNomeDaColunaCondicional, void *vParametroCondicao, XSV_tpCondicaoDeColuna vCondicaoDaColuna)
+XSV_tpCondRet XSV_AcrescentarColunaCondicionalNaLista(XSV_tppListaDeColunasCondicionais *ppListaDeColunasCondicionais, std::string pNomeDaColunaCondicional, void *vParametroCondicao, XSV_tpCondicaoDeColuna vCondicaoDaColuna)
 {
     XSV_tppColunaCondicional pColunaCondicional;
 
@@ -1059,7 +1059,7 @@ XSV_tpCondRet XSV_AcrescentarColunaCondicionalNaLista(XSV_tppListaDeColunasCondi
 *       XSV_CondRetFaltouMemoria - Alocação dinâmica de memória falhou.
 *
 ****************************************************************************/
-XSV_tpCondRet XSV_AcrescentarColunaParaImpressaoNaLista(XSV_tppListaDeColunasParaImpressao *ppListaDeColunasParaImpressao, const char *pNomeDaColunaParaImpressao, void (*funcaoDeTransformacao)(char *), unsigned char vPosicaoRequerida)
+XSV_tpCondRet XSV_AcrescentarColunaParaImpressaoNaLista(XSV_tppListaDeColunasParaImpressao *ppListaDeColunasParaImpressao, std::string pNomeDaColunaParaImpressao, void (*funcaoDeTransformacao)(std::string), int8_t vPosicaoRequerida)
 {
     XSV_tppColunaParaImpressao pColunaParaImpressao;
 
@@ -1156,7 +1156,7 @@ XSV_tpCondRet XSV_CriarListaDeColunas(LIS_tppCabecaLista *ppListaDeColunasSeleci
 *           condição de retorno bem sucedida.
 *
 ****************************************************************************/
-XSV_tpCondRet XSV_AcrescentarStringNaListaDeStrings(XSV_tppListaDeStringsParaImpressao pListaDeStringsParaImpressao, char pString[], unsigned char vPosicao)
+XSV_tpCondRet XSV_AcrescentarStringNaListaDeStrings(XSV_tppListaDeStringsParaImpressao pListaDeStringsParaImpressao, char pString[], int8_t vPosicao)
 {
     if (LIS_IrParaPrimeiroNo(pListaDeStringsParaImpressao) != LIS_CondRetOK)
         return XSV_CondRetProblemaDeLista;
@@ -1207,7 +1207,7 @@ XSV_tpCondRet XSV_AcrescentarStringNaListaDeStrings(XSV_tppListaDeStringsParaImp
 XSV_tpCondRet XSV_ImprimirListaDeStrings(XSV_tppListaDeStringsParaImpressao pListaDeStringsParaImpressao)
 {
     char pStringCompleta[1024];
-    char *pStringParcial;
+    std::string pStringParcial;
 
     if (LIS_IrParaPrimeiroNo(pListaDeStringsParaImpressao) != LIS_CondRetOK)
         return XSV_CondRetProblemaDeLista;
@@ -1264,7 +1264,7 @@ XSV_tpCondRet XSV_ImprimirListaDeStrings(XSV_tppListaDeStringsParaImpressao pLis
 XSV_tpCondRet XSV_LiberarConteudoDosNosDaListaDeStrings(XSV_tppListaDeStringsParaImpressao pListaDeStringsParaImpressao)
 {
 
-    char *pStringParcial;
+    std::string pStringParcial;
 
     if (LIS_IrParaPrimeiroNo(pListaDeStringsParaImpressao) != LIS_CondRetOK)
         return XSV_CondRetProblemaDeLista;
@@ -1316,7 +1316,7 @@ XSV_tpCondRet XSV_LiberarConteudoDosNosDaListaDeStrings(XSV_tppListaDeStringsPar
 *           condição de retorno bem sucedida.
 *
 ****************************************************************************/
-XSV_tpCondRet XSV_CriarListaDeStrings(XSV_tppListaDeStringsParaImpressao *ppListaDeStringsParaImpressao, unsigned char vNumNos)
+XSV_tpCondRet XSV_CriarListaDeStrings(XSV_tppListaDeStringsParaImpressao *ppListaDeStringsParaImpressao, int8_t vNumNos)
 {
     if (LIS_CriarLista(NULL, ppListaDeStringsParaImpressao) != LIS_CondRetOK)
         return XSV_CondRetProblemaDeLista;
@@ -1374,7 +1374,7 @@ XSV_tpCondRet XSV_CriarListaDeStrings(XSV_tppListaDeStringsParaImpressao *ppList
 *           condição de retorno bem sucedida.
 *
 ****************************************************************************/
-XSV_tpCondRet XSV_BuscaColunaNaListaDeColunasCondicionais(XSV_tppListaDeColunasCondicionais pListaDeColunasCondicionais, char pNomeDaColunaBuscada[], char *pResultadoDaBusca)
+XSV_tpCondRet XSV_BuscaColunaNaListaDeColunasCondicionais(XSV_tppListaDeColunasCondicionais pListaDeColunasCondicionais, char pNomeDaColunaBuscada[], std::string pResultadoDaBusca)
 {
 
     XSV_tppColunaCondicional pColunaCondicional;
@@ -1446,7 +1446,7 @@ XSV_tpCondRet XSV_BuscaColunaNaListaDeColunasCondicionais(XSV_tppListaDeColunasC
 *           condição de retorno bem sucedida.
 *
 ****************************************************************************/
-XSV_tpCondRet XSV_BuscaColunaNaListaDeColunasParaImpressao(XSV_tppListaDeColunasParaImpressao pListaDeColunasParaImpressao, char pNomeDaColunaBuscada[], char *pResultadoDaBusca)
+XSV_tpCondRet XSV_BuscaColunaNaListaDeColunasParaImpressao(XSV_tppListaDeColunasParaImpressao pListaDeColunasParaImpressao, char pNomeDaColunaBuscada[], std::string pResultadoDaBusca)
 {
 
     XSV_tppColunaParaImpressao pColunaParaImpressao;
