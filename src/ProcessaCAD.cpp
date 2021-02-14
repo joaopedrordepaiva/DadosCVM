@@ -1,4 +1,4 @@
-#include "../MODULOS/XSV.H"
+#include "../lib/XSV.hpp"
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
@@ -52,7 +52,7 @@ int main(int argc, char **argv)
     XSV_tppHandleXSV pHandleXSV;
 
     const char pSeparadorDeColunas[] = ";";
-    const char pNomeDoArquivoDeInput[] = "INFORMACOES_CONTABEIS/CAD/CAD.csv";
+    const char pNomeDoArquivoDeInput[] = "InformacoesContabeis/CAD/CAD.csv";
 
     if (XSV_CriarHandleDeArquivoXSV(&pHandleXSV) != XSV_CondRetOK)
     {
