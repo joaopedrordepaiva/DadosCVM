@@ -8,7 +8,7 @@ echo "Diretório criado."
 echo ""
 
 echo "Processando arquivo de dados cadastrais..."
-g++ -Wall -o bin/ProcessaCAD lib/XSV.cpp src/ProcessaCAD.cpp
+g++ -Wall -o bin/ProcessaCAD lib/XSV.cpp lib/LISTA.C src/ProcessaCAD.cpp
 ./bin/ProcessaCAD > PROCESSADO.csv
 rm InformacoesContabeis/CAD/CAD.csv
 mv PROCESSADO.csv InformacoesContabeis/CAD/CAD.csv

@@ -67,76 +67,43 @@ done > /dev/null
 echo "Arquivos foram extraídos."
 echo ""
 
-echo "Organizando arquivos..."
+echo "Convertendo, sanitizando e organizando arquivos..."
 for file in InformacoesContabeis/ICA/*.csv
 do
     case $file in
         
         *[Bb][Pp][Aa]*)
-    mv "$file" InformacoesContabeis/ICA/BPA/`expr match "$file" '.*\(2[0-9][0-9][0-9]\)'`.csv
+    iconv -c -f ISO-8859-1 -t ASCII//TRANSLIT "$file" > InformacoesContabeis/ICA/BPA/`expr match "$file" '.*\(2[0-9][0-9][0-9]\)'`.csv
         ;;
         
         *[Bb][Pp][Pp]*)
-    mv "$file" InformacoesContabeis/ICA/BPP/`expr match "$file" '.*\(2[0-9][0-9][0-9]\)'`.csv
+    iconv -c -f ISO-8859-1 -t ASCII//TRANSLIT "$file" > InformacoesContabeis/ICA/BPP/`expr match "$file" '.*\(2[0-9][0-9][0-9]\)'`.csv
         ;;
         
         *[Dd][Ff][Cc]?[Mm][Dd]*)
-    mv "$file" InformacoesContabeis/ICA/DFC_MD/`expr match "$file" '.*\(2[0-9][0-9][0-9]\)'`.csv
+    iconv -c -f ISO-8859-1 -t ASCII//TRANSLIT "$file" > InformacoesContabeis/ICA/DFC_MD/`expr match "$file" '.*\(2[0-9][0-9][0-9]\)'`.csv
         ;;
-    
+
         *[Dd][Ff][Cc]?[Mm][Ii]*)
-    mv "$file" InformacoesContabeis/ICA/DFC_MI/`expr match "$file" '.*\(2[0-9][0-9][0-9]\)'`.csv
+    iconv -c -f ISO-8859-1 -t ASCII//TRANSLIT "$file" > InformacoesContabeis/ICA/DFC_MI/`expr match "$file" '.*\(2[0-9][0-9][0-9]\)'`.csv
         ;;
         
         *[Dd][Mm][Pp][Ll]*)
-    mv "$file" InformacoesContabeis/ICA/DMPL/`expr match "$file" '.*\(2[0-9][0-9][0-9]\)'`.csv
+    iconv -c -f ISO-8859-1 -t ASCII//TRANSLIT "$file" > InformacoesContabeis/ICA/DMPL/`expr match "$file" '.*\(2[0-9][0-9][0-9]\)'`.csv
         ;;
         
         *[Dd][Rr][Ee]*)
-    mv "$file" InformacoesContabeis/ICA/DRE/`expr match "$file" '.*\(2[0-9][0-9][0-9]\)'`.csv
+    iconv -c -f ISO-8859-1 -t ASCII//TRANSLIT "$file" > InformacoesContabeis/ICA/DRE/`expr match "$file" '.*\(2[0-9][0-9][0-9]\)'`.csv
         ;;
         
         *[Dd][Vv][Aa]*)
-    mv "$file" InformacoesContabeis/ICA/DVA/`expr match "$file" '.*\(2[0-9][0-9][0-9]\)'`.csv
+    iconv -c -f ISO-8859-1 -t ASCII//TRANSLIT "$file" > InformacoesContabeis/ICA/DVA/`expr match "$file" '.*\(2[0-9][0-9][0-9]\)'`.csv
         ;;
     esac
+    rm "$file"
 done > /dev/null
 echo "Arquivos foram organizados."
 echo ""
-
-# echo "Convertendo arquivos para ASCII e os organizando..."
-# for file in InformacoesContabeis/ICA/*.csv
-# do
-#     case $file in
-        
-#         *[Bb][Pp][Aa]*)
-#     iconv -f ISO-8859-1 -t ASCII//TRANSLIT "$file" > InformacoesContabeis/ICA/BPA/`expr match "$file" '.*\(2[0-9][0-9][0-9]\)'`.csv
-#         ;;
-        
-#         *[Bb][Pp][Pp]*)
-#     iconv -f ISO-8859-1 -t ASCII//TRANSLIT "$file" > InformacoesContabeis/ICA/BPP/`expr match "$file" '.*\(2[0-9][0-9][0-9]\)'`.csv
-#         ;;
-        
-#         *[Dd][Ff][Cc]?[Mm][Dd]*)
-#     iconv -f ISO-8859-1 -t ASCII//TRANSLIT "$file" > InformacoesContabeis/ICA/DFC_MD/`expr match "$file" '.*\(2[0-9][0-9][0-9]\)'`.csv
-#         ;;
-        
-#         *[Dd][Mm][Pp][Ll]*)
-#     iconv -f ISO-8859-1 -t ASCII//TRANSLIT "$file" > InformacoesContabeis/ICA/DMPL/`expr match "$file" '.*\(2[0-9][0-9][0-9]\)'`.csv
-#         ;;
-        
-#         *[Dd][Rr][Ee]*)
-#     iconv -f ISO-8859-1 -t ASCII//TRANSLIT "$file" > InformacoesContabeis/ICA/DRE/`expr match "$file" '.*\(2[0-9][0-9][0-9]\)'`.csv
-#         ;;
-        
-#         *[Dd][Vv][Aa]*)
-#     iconv -f ISO-8859-1 -t ASCII//TRANSLIT "$file" > InformacoesContabeis/ICA/DVA/`expr match "$file" '.*\(2[0-9][0-9][0-9]\)'`.csv
-#         ;;
-#     esac
-#     rm "$file"
-# done > /dev/null
-# echo "Arquivos foram convertidos."
-# echo ""
 
 echo "Iniciando Processamento das Informações Contábeis Trimestrais (ITR)."
 echo ""
@@ -190,39 +157,40 @@ done > /dev/null
 echo "Arquivos foram extraídos."
 echo ""
 
-echo "Organizando arquivos..."
+echo "Convertendo, sanitizando e organizando arquivos..."
 for file in InformacoesContabeis/ITR/*.csv
 do
     case $file in
         
         *[Bb][Pp][Aa]*)
-    mv "$file" InformacoesContabeis/ITR/BPA/`expr match "$file" '.*\(2[0-9][0-9][0-9]\)'`.csv
+    iconv -c -f ISO-8859-1 -t ASCII//TRANSLIT "$file" > InformacoesContabeis/ITR/BPA/`expr match "$file" '.*\(2[0-9][0-9][0-9]\)'`.csv
         ;;
         
         *[Bb][Pp][Pp]*)
-    mv "$file" InformacoesContabeis/ITR/BPP/`expr match "$file" '.*\(2[0-9][0-9][0-9]\)'`.csv
+    iconv -c -f ISO-8859-1 -t ASCII//TRANSLIT "$file" > InformacoesContabeis/ITR/BPP/`expr match "$file" '.*\(2[0-9][0-9][0-9]\)'`.csv
         ;;
         
         *[Dd][Ff][Cc]?[Mm][Dd]*)
-    mv "$file" InformacoesContabeis/ITR/DFC_MD/`expr match "$file" '.*\(2[0-9][0-9][0-9]\)'`.csv
+    iconv -c -f ISO-8859-1 -t ASCII//TRANSLIT "$file" > InformacoesContabeis/ITR/DFC_MD/`expr match "$file" '.*\(2[0-9][0-9][0-9]\)'`.csv
         ;;
 
         *[Dd][Ff][Cc]?[Mm][Ii]*)
-    mv "$file" InformacoesContabeis/ITR/DFC_MI/`expr match "$file" '.*\(2[0-9][0-9][0-9]\)'`.csv
+    iconv -c -f ISO-8859-1 -t ASCII//TRANSLIT "$file" > InformacoesContabeis/ITR/DFC_MI/`expr match "$file" '.*\(2[0-9][0-9][0-9]\)'`.csv
         ;;
         
         *[Dd][Mm][Pp][Ll]*)
-    mv "$file" InformacoesContabeis/ITR/DMPL/`expr match "$file" '.*\(2[0-9][0-9][0-9]\)'`.csv
+    iconv -c -f ISO-8859-1 -t ASCII//TRANSLIT "$file" > InformacoesContabeis/ITR/DMPL/`expr match "$file" '.*\(2[0-9][0-9][0-9]\)'`.csv
         ;;
         
         *[Dd][Rr][Ee]*)
-    mv "$file" InformacoesContabeis/ITR/DRE/`expr match "$file" '.*\(2[0-9][0-9][0-9]\)'`.csv
+    iconv -c -f ISO-8859-1 -t ASCII//TRANSLIT "$file" > InformacoesContabeis/ITR/DRE/`expr match "$file" '.*\(2[0-9][0-9][0-9]\)'`.csv
         ;;
         
         *[Dd][Vv][Aa]*)
-    mv "$file" InformacoesContabeis/ITR/DVA/`expr match "$file" '.*\(2[0-9][0-9][0-9]\)'`.csv
+    iconv -c -f ISO-8859-1 -t ASCII//TRANSLIT "$file" > InformacoesContabeis/ITR/DVA/`expr match "$file" '.*\(2[0-9][0-9][0-9]\)'`.csv
         ;;
     esac
+    rm "$file"
 done > /dev/null
 echo "Arquivos foram organizados."
 echo ""
@@ -235,19 +203,11 @@ wget -P InformacoesContabeis/CAD/ -q -r -nH --cut-dirs=6 --no-parent -e robots=o
 echo "Informações Cadastrais foram copiadas para o diretório CAD."
 echo ""
 
-echo "Organizando arquivos..."
+echo "Convertendo arquivos para ASCII..."
 for file in InformacoesContabeis/CAD/*.csv
 do
-    mv "$file" "InformacoesContabeis/CAD/CAD.csv"
+    iconv -c -f ISO-8859-1 -t ASCII//TRANSLIT "$file" > "InformacoesContabeis/CAD/CAD.csv"
+    rm "$file"
 done > /dev/null
-echo "Arquivos foram organizados."
+echo "Arquivos foram convertidos."
 echo ""
-
-# echo "Convertendo arquivos para ASCII..."
-# for file in InformacoesContabeis/CAD/*.csv
-# do
-#     iconv -f ISO-8859-1 -t ASCII//TRANSLIT "$file" > "InformacoesContabeis/CAD/CAD.csv"
-#     rm "$file"
-# done > /dev/null
-# echo "Arquivos foram convertidos."
-# echo ""

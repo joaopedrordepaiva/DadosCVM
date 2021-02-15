@@ -189,7 +189,7 @@ XSV_tpCondRet XSV_DestruirHandleDeArquivoXSV(XSV_tppHandleXSV pHandleXSV);
 *       XSV_CondRetOK - Condição de retorno de execução bem sucedida.
 *
 ****************************************************************************/
-XSV_tpCondRet XSV_DefinirSeparadorDoInput(XSV_tppHandleXSV pHandleXSV, std::string pSeparadorDeColunas);
+XSV_tpCondRet XSV_DefinirSeparadorDoInput(XSV_tppHandleXSV pHandleXSV, const char *pSeparadorDeColunas);
 
 /****************************************************************************
 *
@@ -222,7 +222,7 @@ XSV_tpCondRet XSV_DefinirSeparadorDoInput(XSV_tppHandleXSV pHandleXSV, std::stri
 *       XSV_CondRetOK - Condição de retorno de execução bem sucedida.
 *
 ****************************************************************************/
-XSV_tpCondRet XSV_DefinirOpArquivoInput(XSV_tppHandleXSV pHandleXSV, std::string pCaminhoParaArquivoDeInput);
+XSV_tpCondRet XSV_DefinirOpArquivoInput(XSV_tppHandleXSV pHandleXSV, const char *pCaminhoParaArquivoDeInput);
 
 /****************************************************************************
 *
@@ -275,7 +275,7 @@ XSV_tpCondRet XSV_DefinirOpArquivoInput(XSV_tppHandleXSV pHandleXSV, std::string
 *           condição de execução bem sucedida.
 *
 ****************************************************************************/
-XSV_tpCondRet XSV_AcrescentarColunaCondicionalAoHandle(XSV_tppHandleXSV pHandleXSV, std::string pNomeDaColunaCondicional, void *pObjetoCondicional, XSV_tpCondicaoDeColuna vCondicaoDaColuna);
+XSV_tpCondRet XSV_AcrescentarColunaCondicionalAoHandle(XSV_tppHandleXSV pHandleXSV, const char *pNomeDaColunaCondicional, void *pObjetoCondicional, XSV_tpCondicaoDeColuna vCondicaoDaColuna);
 
 /****************************************************************************
 *
@@ -324,7 +324,7 @@ XSV_tpCondRet XSV_AcrescentarColunaCondicionalAoHandle(XSV_tppHandleXSV pHandleX
 *           condição de execução bem sucedida.
 *
 ****************************************************************************/
-XSV_tpCondRet XSV_AcrescentarColunaParaImpressaoAoHandle(XSV_tppHandleXSV pHandleXSV, std::string pNomeDaColunaParaImpressao, void (*funcaoDeTransformacao)(char *));
+XSV_tpCondRet XSV_AcrescentarColunaParaImpressaoAoHandle(XSV_tppHandleXSV pHandleXSV, const char *pNomeDaColunaParaImpressao, void (*funcaoDeTransformacao)(std::string));
 
 /****************************************************************************
 *
