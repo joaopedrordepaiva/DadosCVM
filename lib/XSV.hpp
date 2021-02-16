@@ -372,5 +372,4 @@ XSV_tpCondRet XSV_AcrescentarColunaParaImpressaoAoHandle(XSV_tppHandleXSV pHandl
 ****************************************************************************/
 XSV_tpCondRet XSV_ExecutarProcessamentoDoArquivoXSV(XSV_tppHandleXSV pHandleXSV);
 
-
 #endif /* XSV_H */

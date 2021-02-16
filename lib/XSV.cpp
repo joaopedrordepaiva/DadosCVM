@@ -1086,9 +1086,8 @@ XSV_tpCondRet XSV_BuscaColunaNaListaDeColunasCondicionais(XSV_tppListaDeColunasC
             *pResultadoDaBusca = true;
             return XSV_CondRetOK;
         }
-
     }
-    
+
     return XSV_CondRetOK;
 }
 
