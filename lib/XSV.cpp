@@ -39,6 +39,8 @@
 *                                   trocadas para const char* para poder
 *                                   passar strings literais nas chamadas de
 *                                   funções.
+*       8.00    jpp     15/02/2021  Tipo lista de strings para impressão
+*                                   convertido para std::list (versão c++).
 *
 ****************************************************************************/
 
@@ -48,8 +50,8 @@
 
 /*********************** Tipos encapulados no módulo ***********************/
 
-typedef struct LIS_tagLista *XSV_tppListaDeColunasParaImpressao;
-typedef struct LIS_tagLista *XSV_tppListaDeColunasCondicionais;
+typedef std::list<XSV_tpColunaParaImpressao> XSV_tppListaDeColunasParaImpressao;
+typedef std::list<XSV_tpColunaCondicional> XSV_tppListaDeColunasCondicionais;
 typedef std::list<std::string> XSV_tppListaDeStringsParaImpressao;
 
 struct XSV_tagHandleXSV
@@ -109,9 +111,9 @@ XSV_tpCondRet XSV_CriarHandleDeArquivoXSV(XSV_tppHandleXSV *ppHandleXSV)
     if (!*ppHandleXSV)
         return XSV_CondRetFaltouMemoria;
 
-    (*ppHandleXSV)->pListaDeColunasParaImpressao = NULL;
-    (*ppHandleXSV)->pListaDeColunasCondicionais = NULL;
-    (*ppHandleXSV)->vNumNos = 0;
+    // (*ppHandleXSV)->pListaDeColunasParaImpressao = NULL;
+    // (*ppHandleXSV)->pListaDeColunasCondicionais = NULL;
+    // (*ppHandleXSV)->vNumNos = 0;
 
     return XSV_CondRetOK;
 }
@@ -122,20 +124,20 @@ XSV_tpCondRet XSV_CriarHandleDeArquivoXSV(XSV_tppHandleXSV *ppHandleXSV)
 *       XSV Destruir handle de arquivo XSV.
 *
 ****************************************************************************/
-XSV_tpCondRet XSV_DestruirHandleDeArquivoXSV(XSV_tppHandleXSV pHandleXSV)
-{
-    if (pHandleXSV->pListaDeColunasParaImpressao)
-        if (LIS_DestruirLista(pHandleXSV->pListaDeColunasParaImpressao) != LIS_CondRetOK)
-            return XSV_CondRetProblemaDeLista;
+// XSV_tpCondRet XSV_DestruirHandleDeArquivoXSV(XSV_tppHandleXSV pHandleXSV)
+// {
+//     if (pHandleXSV->pListaDeColunasParaImpressao)
+//         if (LIS_DestruirLista(pHandleXSV->pListaDeColunasParaImpressao) != LIS_CondRetOK)
+//             return XSV_CondRetProblemaDeLista;
 
-    if (pHandleXSV->pListaDeColunasCondicionais)
-        if (LIS_DestruirLista(pHandleXSV->pListaDeColunasCondicionais) != LIS_CondRetOK)
-            return XSV_CondRetProblemaDeLista;
+//     if (pHandleXSV->pListaDeColunasCondicionais)
+//         if (LIS_DestruirLista(pHandleXSV->pListaDeColunasCondicionais) != LIS_CondRetOK)
+//             return XSV_CondRetProblemaDeLista;
 
-    free(pHandleXSV);
+//     free(pHandleXSV);
 
-    return XSV_CondRetOK;
-}
+//     return XSV_CondRetOK;
+// }
 
 /****************************************************************************
 *
@@ -926,12 +928,6 @@ XSV_tpCondRet XSV_VerificaColunaCondicional(void *pObjetoCondicional, const char
 ****************************************************************************/
 XSV_tpCondRet XSV_AcrescentarColunaCondicionalNaLista(XSV_tppListaDeColunasCondicionais *ppListaDeColunasCondicionais, const char *pNomeDaColunaCondicional, void *vParametroCondicao, XSV_tpCondicaoDeColuna vCondicaoDaColuna)
 {
-    if (!*ppListaDeColunasCondicionais)
-    {
-        XSV_tpCondRet vCondRetDeXSV = XSV_CriarListaDeColunas(ppListaDeColunasCondicionais);
-        if (vCondRetDeXSV != XSV_CondRetOK)
-            return vCondRetDeXSV;
-    }
 
     XSV_tppColunaCondicional pColunaCondicional = (XSV_tppColunaCondicional)malloc(sizeof(struct XSV_tpColunaCondicional));
     if (!pColunaCondicional)
@@ -941,8 +937,7 @@ XSV_tpCondRet XSV_AcrescentarColunaCondicionalNaLista(XSV_tppListaDeColunasCondi
     pColunaCondicional->vParametroCondicao = vParametroCondicao;
     pColunaCondicional->vCondicaoDaColuna = vCondicaoDaColuna;
 
-    if (LIS_InserirNoApos(*ppListaDeColunasCondicionais, (void *)pColunaCondicional) != LIS_CondRetOK)
-        return XSV_CondRetProblemaDeLista;
+    (*ppListaDeColunasCondicionais).push_back(pColunaCondicional);
 
     return XSV_CondRetOK;
 }
@@ -986,13 +981,6 @@ XSV_tpCondRet XSV_AcrescentarColunaCondicionalNaLista(XSV_tppListaDeColunasCondi
 ****************************************************************************/
 XSV_tpCondRet XSV_AcrescentarColunaParaImpressaoNaLista(XSV_tppListaDeColunasParaImpressao *ppListaDeColunasParaImpressao, const char *pNomeDaColunaParaImpressao, void (*funcaoDeTransformacao)(std::string), uint8_t vPosicaoRequerida)
 {
-    if (!*ppListaDeColunasParaImpressao)
-    {
-        XSV_tpCondRet vCondRetDeXSV = XSV_CriarListaDeColunas(ppListaDeColunasParaImpressao);
-        if (vCondRetDeXSV != XSV_CondRetOK)
-            return vCondRetDeXSV;
-    }
-
     XSV_tppColunaParaImpressao pColunaParaImpressao = (XSV_tppColunaParaImpressao)malloc(sizeof(struct XSV_tpColunaParaImpressao));
     if (!pColunaParaImpressao)
         return XSV_CondRetFaltouMemoria;
@@ -1001,8 +989,7 @@ XSV_tpCondRet XSV_AcrescentarColunaParaImpressaoNaLista(XSV_tppListaDeColunasPar
     pColunaParaImpressao->funcaoDeTransformacao = funcaoDeTransformacao;
     pColunaParaImpressao->vPosicaoRequerida = vPosicaoRequerida;
 
-    if (LIS_InserirNoApos(*ppListaDeColunasParaImpressao, (void *)pColunaParaImpressao) != LIS_CondRetOK)
-        return XSV_CondRetProblemaDeLista;
+    (*ppListaDeColunasParaImpressao).push_back(pColunaParaImpressao);
 
     return XSV_CondRetOK;
 }
@@ -1034,13 +1021,13 @@ XSV_tpCondRet XSV_AcrescentarColunaParaImpressaoNaLista(XSV_tppListaDeColunasPar
 *           condição de retorno bem sucedida.
 *
 ****************************************************************************/
-XSV_tpCondRet XSV_CriarListaDeColunas(LIS_tppCabecaLista *ppListaDeColunasSelecionadas)
-{
-    if (LIS_CriarLista(free, ppListaDeColunasSelecionadas) != LIS_CondRetOK)
-        return XSV_CondRetProblemaDeLista;
+// XSV_tpCondRet XSV_CriarListaDeColunas(LIS_tppCabecaLista *ppListaDeColunasSelecionadas)
+// {
+//     if (LIS_CriarLista(free, ppListaDeColunasSelecionadas) != LIS_CondRetOK)
+//         return XSV_CondRetProblemaDeLista;
 
-    return XSV_CondRetOK;
-}
+//     return XSV_CondRetOK;
+// }
 
 /****************************************************************************
 *
@@ -1088,31 +1075,20 @@ XSV_tpCondRet XSV_BuscaColunaNaListaDeColunasCondicionais(XSV_tppListaDeColunasC
 
     *pResultadoDaBusca = false;
 
-    if (!pListaDeColunasCondicionais)
-        return XSV_CondRetListaDeColunasNaoCriada;
-
-    else if (LIS_IrParaPrimeiroNo(pListaDeColunasCondicionais) != LIS_CondRetOK)
+    if (pListaDeColunasCondicionais.empty())
         return XSV_CondRetListaDeColunasVazia;
 
-    do
     {
-        XSV_tppColunaCondicional pColunaCondicional;
+        XSV_tppListaDeColunasCondicionais::iterator iteradorDeListaDeColunasCondicionais = pListaDeColunasCondicionais.begin();
 
-        if (LIS_ObterConteudo(pListaDeColunasCondicionais, (void **)&pColunaCondicional) != LIS_CondRetOK)
-            return XSV_CondRetProblemaDeLista;
-
-        if (pNomeDaColunaBuscada == pColunaCondicional->pNomeDaColunaCondicional)
+        if (*iteradorDeListaDeColunasCondicionais == pNomeDaColunaBuscada)
         {
             *pResultadoDaBusca = true;
             return XSV_CondRetOK;
         }
 
-    } while (LIS_IrParaProximoNo(pListaDeColunasCondicionais) == LIS_CondRetOK);
-
-    *pResultadoDaBusca = false;
-    if (LIS_IrParaPrimeiroNo(pListaDeColunasCondicionais) != LIS_CondRetOK)
-        return XSV_CondRetProblemaDeLista;
-
+    }
+    
     return XSV_CondRetOK;
 }
 
