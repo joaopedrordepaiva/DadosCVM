@@ -1,0 +1,11 @@
+{
+    "files.associations": {
+        "XSV.C": "cpp",
+        "LISTA.C": "cpp",
+        "ORGANIZA_EMPRESAS_SETORES.C": "cpp",
+        "PRINCIPAL_CAD.C": "cpp",
+        "PRINCIPAL_IC.C": "cpp",
+        "ProcessaCAD.C": "cpp",
+        "OrganizaEmpresasEmSetores.C": "cpp"
+    }
+}

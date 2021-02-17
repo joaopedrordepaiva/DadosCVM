@@ -42,8 +42,8 @@
 *
 ****************************************************************************/
 
-#include "LISTA.H"
-#include "XSV.H"
+#include "LISTA.h"
+#include "XSV.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>

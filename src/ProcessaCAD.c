@@ -1,4 +1,4 @@
-#include "../MODULOS/XSV.H"
+#include "../lib/XSV.H"
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
@@ -44,15 +44,9 @@ void stringRemoveCaracteresEspeciais(char pString[])
     return;
 }
 
-/* abcd//ewd/ewd */
-/* abcdewdewd */
-
 int main(int argc, char **argv)
 {
     XSV_tppHandleXSV pHandleXSV;
-
-    const char pSeparadorDeColunas[] = ";";
-    const char pNomeDoArquivoDeInput[] = "INFORMACOES_CONTABEIS/CAD/CAD.csv";
 
     if (XSV_CriarHandleDeArquivoXSV(&pHandleXSV) != XSV_CondRetOK)
     {
@@ -60,7 +54,7 @@ int main(int argc, char **argv)
         exit(1);
     }
 
-    if (XSV_DefinirSeparadorDoInput(pHandleXSV, pSeparadorDeColunas) != XSV_CondRetOK)
+    if (XSV_DefinirSeparadorDoInput(pHandleXSV, ";") != XSV_CondRetOK)
     {
 
         fprintf(stderr, "Problema na definição do separador na handle do arquivo XSV.\n");
@@ -69,7 +63,7 @@ int main(int argc, char **argv)
         exit(1);
     }
 
-    if (XSV_DefinirOpArquivoInput(pHandleXSV, pNomeDoArquivoDeInput) != XSV_CondRetOK)
+    if (XSV_DefinirOpArquivoInput(pHandleXSV, "InformacoesContabeis/CAD/CAD.csv") != XSV_CondRetOK)
     {
         fprintf(stderr, "Problema na definição do arquivo de input da handle do arquivo XSV.\n");
         if (XSV_DestruirHandleDeArquivoXSV(pHandleXSV) != XSV_CondRetOK)
@@ -85,7 +79,7 @@ int main(int argc, char **argv)
         exit(1);
     }
 
-    if (XSV_AcrescentarColunaParaImpressaoAoHandle(pHandleXSV, "SETOR_ATIV", stringUpper) != XSV_CondRetOK)
+    if (XSV_AcrescentarColunaParaImpressaoAoHandle(pHandleXSV, "SETOR_ATIV", NULL) != XSV_CondRetOK)
     {
         fprintf(stderr, "Problema na adição de coluna para impressão na handle do arquivo XSV.\n");
         if (XSV_DestruirHandleDeArquivoXSV(pHandleXSV) != XSV_CondRetOK)
@@ -93,7 +87,7 @@ int main(int argc, char **argv)
         exit(1);
     }
 
-    if (XSV_AcrescentarColunaParaImpressaoAoHandle(pHandleXSV, "DENOM_SOCIAL", stringRemoveCaracteresEspeciais) != XSV_CondRetOK)
+    if (XSV_AcrescentarColunaParaImpressaoAoHandle(pHandleXSV, "DENOM_SOCIAL", NULL) != XSV_CondRetOK)
     {
         fprintf(stderr, "Problema na adição de coluna para impressão na handle do arquivo XSV.\n");
         if (XSV_DestruirHandleDeArquivoXSV(pHandleXSV) != XSV_CondRetOK)

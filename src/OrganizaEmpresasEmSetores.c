@@ -5,7 +5,7 @@
 #include <errno.h>
 #include <unistd.h>
 #include <sys/stat.h>
-#include "../MODULOS/LISTA.H"
+#include "../lib/LISTA.H"
 
 #define TAMVETOR 16
 
