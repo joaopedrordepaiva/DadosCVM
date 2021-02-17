@@ -38,7 +38,6 @@
 #include <list>
 #include <bitset>
 #include <string.h>
-#include "LISTA.h"
 
 /******************* Declarações exportadas pelo módulo ********************/
 
@@ -59,7 +58,7 @@ typedef enum XSV_enumCondRet
 
     XSV_CondRetOK, /* Concluiu corretamente */
 
-    XSV_CondRetFaltouMemoria, /* Faltou memória para allocar */
+    XSV_CondRetFaltouMemoria, /* Faltou memória para alocar */
 
     XSV_CondRetProblemaDeLista, /* Função de LIS não retornou condição de
     execução bem sucedida quando deveria */
