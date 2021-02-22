@@ -39,8 +39,13 @@
 *                                   trocadas para const char* para poder
 *                                   passar strings literais nas chamadas de
 *                                   funções.
-*       8.00    jpp     15/02/2021  Tipo lista de strings para impressão
-*                                   convertido para std::list (versão c++).
+*       8.00    jpp     15/02/2021  Tipo string convertidas para std::string,
+*                                   tipo lista de strings para impressão
+*                                   convertido para std::list e bitsets com
+*                                   tipo inteiro convertidos para std::bitset
+*                                   (início da conversão para C++).
+*       8.00    jpp     17/02/2021  Listas de colunas convertidas para
+*                                   std::list.
 *
 ****************************************************************************/
 
