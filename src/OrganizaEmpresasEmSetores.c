@@ -422,7 +422,7 @@ tpCondRet TratarArquivoICAeITR(const char *pCaminhoArquivoICA, const char *pCami
 
             if (!(pEmpresa->pArquivoEscrita))
             {
-                mkdir(strcat(strcpy(cwd, "INFORMACOES_CONTABEIS/SETORES/"), pEmpresa->pSetor), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+                mkdir(strcat(strcpy(cwd, "InformacoesContabeis/Setores/"), pEmpresa->pSetor), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
                 mkdir(strcat(strcat(cwd, "/"), pEmpresa->pNome), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
                 pEmpresa->pArquivoEscrita = fopen(strcat(strcat(strcat(cwd, "/"), pNomeFormulario), ".csv"), "a");
                 if (!(pEmpresa->pArquivoEscrita))
@@ -520,7 +520,7 @@ tpCondRet TratarArquivoICAouITR(const char *pCaminhoArquivo, tppListaDeEmpresas 
 
             if (!(pEmpresa->pArquivoEscrita))
             {
-                mkdir(strcat(strcpy(cwd, "INFORMACOES_CONTABEIS/SETORES/"), pEmpresa->pSetor), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+                mkdir(strcat(strcpy(cwd, "InformacoesContabeis/Setores/"), pEmpresa->pSetor), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
                 mkdir(strcat(strcat(cwd, "/"), pEmpresa->pNome), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
                 pEmpresa->pArquivoEscrita = fopen(strcat(strcat(strcat(cwd, "/"), pNomeFormulario), ".csv"), "a");
                 if (!(pEmpresa->pArquivoEscrita))
@@ -743,9 +743,9 @@ int main(int argc, char **argv)
 
     char *pCaminhaPorString, *pSetor, *pNome;
 
-    mkdir("INFORMACOES_CONTABEIS/SETORES", S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+    mkdir("InformacoesContabeis/Setores", S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
 
-    pArquivo = fopen("INFORMACOES_CONTABEIS/CAD/CAD.csv", "r");
+    pArquivo = fopen("InformacoesContabeis/CAD/CAD.csv", "r");
 
     if (!pArquivo)
     {
@@ -828,7 +828,7 @@ int main(int argc, char **argv)
 
     pListaDeDiretorios = NULL;
 
-    if (CriarListaDeDiretoriosICA("INFORMACOES_CONTABEIS/ICA", &pListaDeDiretorios) != CondRetOK)
+    if (CriarListaDeDiretoriosICA("InformacoesContabeis/ICA", &pListaDeDiretorios) != CondRetOK)
     {
         fprintf(stderr, "Não foi possível criar lista de diretórios ICA.\n");
         DestruirTabelaHashDeEmpresas(pTabelaHashDeEmpresas);
@@ -836,7 +836,7 @@ int main(int argc, char **argv)
         return 1;
     }
 
-    if (CriarListaDeDiretoriosITR("INFORMACOES_CONTABEIS/ITR", &pListaDeDiretorios) != CondRetOK)
+    if (CriarListaDeDiretoriosITR("InformacoesContabeis/ITR", &pListaDeDiretorios) != CondRetOK)
     {
         fprintf(stderr, "Não foi possível criar lista de diretórios ITR.\n");
         DestruirTabelaHashDeEmpresas(pTabelaHashDeEmpresas);
