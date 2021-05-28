@@ -1,4 +1,4 @@
-#include "../lib/XSV.H"
+#include "../lib/XSV.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
