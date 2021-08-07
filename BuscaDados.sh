@@ -101,6 +101,7 @@ do
         ;;
     esac
     rm "$file"
+
 done > /dev/null
 echo "Arquivos foram organizados."
 echo ""
@@ -158,6 +159,7 @@ echo "Arquivos foram extraídos."
 echo ""
 
 echo "Convertendo arquivos para ASCII e os organizando..."
+
 for file in InformacoesContabeis/ITR/*.csv
 do
     case $file in
@@ -190,9 +192,8 @@ do
     iconv -c -f ISO-8859-1 -t ASCII//TRANSLIT "$file" > InformacoesContabeis/ITR/DVA/`expr match "$file" '.*\(2[0-9][0-9][0-9]\)'`.csv
         ;;
     esac
-    rm "$file"
 done > /dev/null
-echo "Arquivos foram convertidos."
+echo "Arquivos foram organizados."
 echo ""
 
 echo "Iniciando Processamento das Informações Cadastrais (CAD)."
