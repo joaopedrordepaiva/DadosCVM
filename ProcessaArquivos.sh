@@ -8,7 +8,7 @@ echo "Diretório criado."
 echo ""
 
 echo "Processando arquivo de dados cadastrais..."
-g++ -Wall -o bin/ProcessaCAD lib/XSV.cpp lib/LISTA.C src/ProcessaCAD.cpp
+gcc -Wall -o bin/ProcessaCAD lib/LISTA.c lib/XSV.c src/ProcessaCAD.c
 ./bin/ProcessaCAD > PROCESSADO.csv
 rm InformacoesContabeis/CAD/CAD.csv
 mv PROCESSADO.csv InformacoesContabeis/CAD/CAD.csv
@@ -16,7 +16,7 @@ echo "Arquivo processado."
 echo ""
 
 echo "Processando arquivos de dados contábeis..."
-g++ -Wall -o bin/ProcessaIC lib/XSV.cpp src/ProcessaIC.cpp
+gcc -Wall -o bin/ProcessaIC lib/LISTA.c lib/XSV.c src/ProcessaIC.c
 for file in $(find InformacoesContabeis/ICA -name '*.csv')
 do
     ./bin/ProcessaIC "$file" > PROCESSADO.csv
@@ -33,7 +33,7 @@ echo "Arquivos processados."
 echo ""
 
 echo "Organizando dados contábeis por setor, empresa, relatório e data..."
-g++ -Wall -o bin/OrganizaEmpresasEmSetores src/OrganizaEmpresasEmSetores.cpp
+gcc -Wall -o bin/OrganizaEmpresasEmSetores lib/LISTA.c src/OrganizaEmpresasEmSetores.c
 ./bin/OrganizaEmpresasEmSetores
 echo "Dados organizados."
 echo ""
